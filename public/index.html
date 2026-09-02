@@ -1,35 +1,115 @@
-HTML
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Videoreacción en Vivo</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { margin: 0; background-color: #0b0e14; color: #fff; font-family: sans-serif; }
-        .grid-container { display: grid; grid-template-columns: 1fr 350px; height: 100vh; }
-        .video-section { display: flex; flex-direction: column; padding: 10px; gap: 10px; box-sizing: border-box; }
-        .video-box { flex: 1; background: #000; position: relative; border-radius: 8px; overflow: hidden; }
-        video, iframe { width: 100%; height: 100%; border: none; }
-        .chat-section { height: 100vh; background: #191b1f; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #0b0e0f;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Indicador de estado superior */
+        #status {
+            background: #181c1e;
+            padding: 8px 15px;
+            font-size: 13px;
+            color: #53fc18; /* Verde Kick */
+            text-align: center;
+            border-bottom: 1px solid #282d30;
+        }
+
+        /* Contenedor Principal de Transmisión */
+        .stream-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 35px);
+            background: #000;
+        }
+
+        /* 1. REPRODUCTOR PRINCIPAL (Video Reacción) */
+        .main-video-wrapper {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+
+        #videoPrivate {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Ocultar botón de Play/Pausa e Fullscreen nativos */
+        #videoPrivate::-webkit-media-controls-play-button,
+        #videoPrivate::-webkit-media-controls-start-playback-button,
+        #videoPrivate::-webkit-media-controls-fullscreen-button {
+            display: none !important;
+            -webkit-appearance: none;
+        }
+
+        /* 2. REPRODUCTOR SECUNDARIO (Cámara de Kick Recortada) */
+        .kick-crop-box {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 280px;  /* Ancho de la caja recorta */
+            height: 210px; /* Alto de la caja recorta */
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #53fc18;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+            background: #000;
+            z-index: 10;
+        }
+
+        /* Recorte enfocando el centro del reproductor Kick */
+        .kick-crop-box iframe {
+            width: 160%;
+            height: 160%;
+            margin-left: -30%; /* Desplaza horizontalmente al centro */
+            margin-top: -20%;  /* Desplaza verticalmente al centro */
+            border: none;
+            pointer-events: none; /* Deshabilita clics e interacción en la cámara */
+        }
     </style>
 </head>
 <body>
-    <div class="grid-container">
-        <div class="video-section">
-            <!-- Video Sincronizado Privado -->
-            <div class="video-box">
-                <video id="videoPrivate" controls muted></video>
-            </div>
-            <!-- Emisión de Kick (Tu Cara / Cámara) -->
-            <div class="video-box">
-                <iframe src="https://player.kick.com/vchicolatino" allowfullscreen></iframe>
-            </div>
+
+    <div id="status">Estado: Conectando al servidor...</div>
+
+    <div class="stream-container">
+        <!-- Reproductor de Video Reacción (Grande) -->
+        <div class="main-video-wrapper">
+            <video id="videoPrivate" controls controlsList="nodownload nofullscreen noremoteplayback"></video>
         </div>
-        <!-- Chat Oficial de Kick -->
-        <div class="chat-section">
-            <iframe src="https://kick.com/popout/vchicolatino/chat"></iframe>
+
+        <!-- Inserción de Kick Recortada en la Esquina (Pequeño) -->
+        <div class="kick-crop-box">
+            <!-- Reemplaza TU_CANAL_KICK por el nombre exacto de tu canal -->
+            <iframe 
+                src="https://player.kick.com/TU_CANAL_KICK" 
+                allowfullscreen="true">
+            </iframe>
         </div>
     </div>
 	<script>
