@@ -23,34 +23,32 @@
             flex-direction: column;
         }
 
-        /* Indicador de estado superior */
         #status {
             background: #181c1e;
             padding: 8px 15px;
             font-size: 13px;
-            color: #53fc18; /* Verde Kick */
+            color: #53fc18;
             text-align: center;
             border-bottom: 1px solid #282d30;
         }
 
-        /* Contenedor Principal de Transmisión */
-        .stream-container {
+        /* Contenedor Principal con Layout Flex (Video a la izquierda, Chat a la derecha) */
+        .main-layout {
             display: flex;
             flex: 1;
-            position: relative;
-            width: 100%;
             height: calc(100vh - 35px);
-            background: #000;
+            width: 100%;
+            position: relative;
         }
 
-        /* 1. REPRODUCTOR PRINCIPAL (Video Reacción) */
-        .main-video-wrapper {
+        /* Área de Video Principal + Cámara Flotante */
+        .stream-container {
             flex: 1;
-            height: 100%;
+            position: relative;
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #000;
         }
 
         #videoPrivate {
@@ -59,7 +57,6 @@
             object-fit: contain;
         }
 
-        /* Ocultar botón de Play/Pausa e Fullscreen nativos */
         #videoPrivate::-webkit-media-controls-play-button,
         #videoPrivate::-webkit-media-controls-start-playback-button,
         #videoPrivate::-webkit-media-controls-fullscreen-button {
@@ -67,13 +64,13 @@
             -webkit-appearance: none;
         }
 
-        /* 2. REPRODUCTOR SECUNDARIO (Cámara de Kick Recortada) */
+        /* Cámara de Kick Recortada (Esquina Inferior Izquierda) */
         .kick-crop-box {
             position: absolute;
             bottom: 20px;
-            right: 20px;
-            width: 280px;  /* Ancho de la caja recorta */
-            height: 210px; /* Alto de la caja recorta */
+            left: 20px;
+            width: 260px;
+            height: 190px;
             border-radius: 12px;
             overflow: hidden;
             border: 2px solid #53fc18;
@@ -82,14 +79,82 @@
             z-index: 10;
         }
 
-        /* Recorte enfocando el centro del reproductor Kick */
         .kick-crop-box iframe {
-            width: 110%;
-            height: 110%;
-            margin-left: -30%; /* Desplaza horizontalmente al centro */
-            /*margin-top: -20%;  Desplaza verticalmente al centro */
+            width: 160%;
+            height: 160%;
+            margin-left: -30%;
+            margin-top: -20%;
             border: none;
-            pointer-events: none; /* Deshabilita clics e interacción en la cámara */
+            pointer-events: none;
+        }
+
+        /* Contenedor del Chat en Vivo (Barra Lateral Derecha) */
+        .chat-container {
+            width: 340px;
+            height: 100%;
+            background: #191b1f;
+            border-left: 1px solid #282d30;
+        }
+
+        .chat-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Botones Flotantes de Kick (Seguir y Suscribir) */
+        .kick-actions {
+            position: absolute;
+            top: 20px;
+            right: 360px; /* Desplazado para no tapar el chat */
+            display: flex;
+            gap: 12px;
+            z-index: 20;
+        }
+
+        .btn-kick {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            font-weight: bold;
+            font-size: 14px;
+            text-decoration: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+            animation: pulseAttention 5s infinite;
+        }
+
+        .btn-follow {
+            background-color: #53fc18;
+            color: #000;
+        }
+
+        .btn-subscribe {
+            background-color: #00e701;
+            color: #000;
+            animation-delay: 0.5s; /* Desfase animación */
+        }
+
+        .btn-kick:hover {
+            transform: scale(1.08);
+        }
+
+        /* Animación Periódica de Atención (Pulso/Vibración) */
+        @keyframes pulseAttention {
+            0%, 80%, 100% {
+                transform: scale(1);
+            }
+            85% {
+                transform: scale(1.12) rotate(-3deg);
+            }
+            90% {
+                transform: scale(1.12) rotate(3deg);
+            }
+            95% {
+                transform: scale(1.08) rotate(0deg);
+            }
         }
     </style>
 </head>
@@ -97,19 +162,33 @@
 
     <div id="status">Estado: Conectando al servidor...</div>
 
-    <div class="stream-container">
-        <!-- Reproductor de Video Reacción (Grande) -->
-        <div class="main-video-wrapper">
+    <div class="main-layout">
+        <!-- Panel Izquierdo: Video y Transmisión -->
+        <div class="stream-container">
+            
+            <!-- Botones de Acción Kick (Seguir / Suscribirse) -->
+            <div class="kick-actions">
+                <!-- REEMPLAZA "TU_CANAL_KICK" por tu nombre de usuario exacto -->
+                <a href="https://kick.com/TU_CANAL_KICK" target="_blank" class="btn-kick btn-follow">
+                    💚 Seguir en Kick
+                </a>
+                <a href="https://kick.com/TU_CANAL_KICK/subscribe" target="_blank" class="btn-kick btn-subscribe">
+                    ⭐ Suscribirse
+                </a>
+            </div>
+
+            <!-- Video Reacción Principal -->
             <video id="videoPrivate" controls controlsList="nodownload nofullscreen noremoteplayback"></video>
+
+            <!-- Cámara Recortada de Kick -->
+            <div class="kick-crop-box">
+                <iframe src="https://player.kick.com/TU_CANAL_KICK" allowfullscreen="true"></iframe>
+            </div>
         </div>
 
-        <!-- Inserción de Kick Recortada en la Esquina (Pequeño) -->
-        <div class="kick-crop-box">
-            <!-- Reemplaza TU_CANAL_KICK por el nombre exacto de tu canal -->
-            <iframe 
-                src="https://player.kick.com/TU_CANAL_KICK" 
-                allowfullscreen="true">
-            </iframe>
+        <!-- Panel Derecho: Chat Incrustado de Kick -->
+        <div class="chat-container">
+            <iframe src="https://kick.com/popout/TU_CANAL_KICK/chat"></iframe>
         </div>
     </div>
 	<script>
