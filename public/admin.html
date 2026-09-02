@@ -18,13 +18,43 @@
     <div class="card">
         <h2>Control de Transmisión</h2>
         <button class="btn-start" onclick="play()">▶ Reiniciar</button>
-        <button id="btnPausa" class="btn-pause" onclick="pause()">⏸ Pausar</button>
+        <button id="btnPausa" class="btn-pause" onclick="togglePausa()">⏸ Pausar</button>
     </div>
 
     <script>
         const socket = io();
-        function play() { socket.emit('admin-play', { time: 0 }); }
-        function pause() { socket.emit('admin-pause'); }
+		let estaPausado = false;
+
+        function play() {
+            estaPausado = false;
+            actualizarBotonPausa();
+            socket.emit('admin-play', { time: 0 });
+        }
+		function togglePausa() {
+            const btn = document.getElementById('btnPausa');
+            if (!estaPausado) {
+                // Pausar
+                estaPausado = true;
+                socket.emit('admin-pause');
+            } else {
+                // Continuar/Reanudar
+                estaPausado = false;
+                socket.emit('resume-video');
+            }
+            actualizarBotonPausa();
+        }
+
+        function actualizarBotonPausa() {
+            const btn = document.getElementById('btnPausa');
+            if (estaPausado) {
+                btn.innerText = "▶ Continuar";
+                btn.className = "btn-resume";
+            } else {
+                btn.innerText = "⏸ Pausar";
+                btn.className = "btn-pause";
+            }
+        }
+        //function pause() { socket.emit('admin-pause'); }
     </script>
 </body>
 </html>

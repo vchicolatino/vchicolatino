@@ -61,6 +61,14 @@ HTML
 
         socket.on('pause-video', () => { video.pause(); });
         socket.on('seek-video', (data) => { video.currentTime = data.time; });
+		
+		// NUEVO: Reanudar desde donde se pausó
+        socket.on('resume-video', () => {
+            video.play().catch(err => {
+                //statusDiv.innerText = "Haz clic en el video para reanudar";
+            });
+            //statusDiv.innerText = "Estado: Reproduciendo...";
+        });
     </script>
 </body>
 </html>
