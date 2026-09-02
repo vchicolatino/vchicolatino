@@ -29,19 +29,6 @@ io.on('connection', (socket) => {
         currentVideoTime = time;
         io.emit('seek-video', { time: currentVideoTime });
     });
-	
-	socket.on('play-video', (data) => {
-		io.emit('play-video', data);
-	});
-
-	socket.on('pause-video', () => {
-		io.emit('pause-video');
-	});
-
-	// NUEVO EVENTO: Reanudar reproducción
-	socket.on('resume-video', () => {
-		io.emit('resume-video');
-	});
 });
 
 const PORT = process.env.PORT || 3000;
