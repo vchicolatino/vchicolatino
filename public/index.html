@@ -32,7 +32,7 @@
             border-bottom: 1px solid #282d30;
         }
 
-        /* Contenedor Principal con Layout Flex (Video a la izquierda, Chat a la derecha) */
+        /* Layout Principal */
         .main-layout {
             display: flex;
             flex: 1;
@@ -41,16 +41,19 @@
             position: relative;
         }
 
-        /* Área de Video Principal + Cámara Flotante */
-        .stream-container {
+        /* 1. CONTENEDOR UNIFICADO DE REPRODUCCIÓN (SE PUEDE MAXIMIZAR) */
+        .player-theater {
             flex: 1;
             position: relative;
             background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
+            width: 100%;
+            height: 100%;
         }
 
+        /* Video Reacción Principal */
         #videoPrivate {
             width: 100%;
             height: 100%;
@@ -64,7 +67,7 @@
             -webkit-appearance: none;
         }
 
-        /* Cámara de Kick Recortada (Esquina Inferior Izquierda) */
+        /* Cámara de Kick Recortada */
         .kick-crop-box {
             position: absolute;
             bottom: 20px;
@@ -88,25 +91,11 @@
             pointer-events: none;
         }
 
-        /* Contenedor del Chat en Vivo (Barra Lateral Derecha) */
-        .chat-container {
-            width: 340px;
-            height: 100%;
-            background: #191b1f;
-            border-left: 1px solid #282d30;
-        }
-
-        .chat-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Botones Flotantes de Kick (Seguir y Suscribir) */
+        /* Botones Flotantes de Kick */
         .kick-actions {
             position: absolute;
             top: 20px;
-            right: 360px; /* Desplazado para no tapar el chat */
+            right: 20px;
             display: flex;
             gap: 12px;
             z-index: 20;
@@ -124,6 +113,8 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: transform 0.2s;
             animation: pulseAttention 5s infinite;
+            cursor: pointer;
+            border: none;
         }
 
         .btn-follow {
@@ -134,14 +125,45 @@
         .btn-subscribe {
             background-color: #00e701;
             color: #000;
-            animation-delay: 0.5s; /* Desfase animación */
+            animation-delay: 0.5s;
+        }
+
+        .btn-fullscreen {
+            background-color: #282d30;
+            color: #fff;
+            animation: none; /* Sin vibración para el botón de maximizar */
         }
 
         .btn-kick:hover {
             transform: scale(1.08);
         }
 
-        /* Animación Periódica de Atención (Pulso/Vibración) */
+        /* Estilos cuando la caja entra en Pantalla Completa */
+        .player-theater:fullscreen {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .player-theater:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* 2. CHAT DE KICK */
+        .chat-container {
+            width: 340px;
+            height: 100%;
+            background: #191b1f;
+            border-left: 1px solid #282d30;
+        }
+
+        .chat-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Animación Periódica de Atención */
         @keyframes pulseAttention {
             0%, 80%, 100% {
                 transform: scale(1);
@@ -160,21 +182,23 @@
 </head>
 <body>
 
-    <div id="status">Estado: Conectando al servidor...</div>
-
     <div class="main-layout">
-        <!-- Panel Izquierdo: Video y Transmisión -->
-        <div class="stream-container">
+        
+        <!-- DIV UNIFICADO: Contiene Video, Cámara, Botones y Soporta Pantalla Completa -->
+        <div id="playerTheater" class="player-theater">
             
-            <!-- Botones de Acción Kick (Seguir / Suscribirse) -->
+            <!-- Botones de Acción Kick + Botón Maximizar -->
             <div class="kick-actions">
-                <!-- REEMPLAZA "TU_CANAL_KICK" por tu nombre de usuario exacto -->
+                <!-- REEMPLAZA "TU_CANAL_KICK" por tu usuario exacto -->
                 <a href="https://kick.com/vchicolatino" target="_blank" class="btn-kick btn-follow">
                     💚 Seguir en Kick
                 </a>
                 <a href="https://kick.com/vchicolatino/subscribe" target="_blank" class="btn-kick btn-subscribe">
                     ⭐ Suscribirse
                 </a>
+                <button class="btn-kick btn-fullscreen" onclick="toggleFullscreen()">
+                    ⛶ Maximizar
+                </button>
             </div>
 
             <!-- Video Reacción Principal -->
@@ -184,19 +208,39 @@
             <div class="kick-crop-box">
                 <iframe src="https://player.kick.com/vchicolatino" allowfullscreen="true"></iframe>
             </div>
+
         </div>
 
-        <!-- Panel Derecho: Chat Incrustado de Kick -->
+        <!-- Panel del Chat de Kick -->
         <div class="chat-container">
             <iframe src="https://kick.com/popout/vchicolatino/chat"></iframe>
         </div>
+
     </div>
 	<script>
         const video = document.getElementById('videoPrivate');
+		const theaterDiv = document.getElementById('playerTheater');
         // Enlace al archivo .m3u8 que subirás a GitHub Releases o Cloudflare
         const videoSrc = 'https://cdn.jsdelivr.net/gh/vchicolatino/vchicolatino@main/public/video/db/Peliculas/Freezer%20contra%20el%20padre%20de%20Goku/stream.m3u8'; 
         const socket = io();
 
+		// Función para activar/desactivar pantalla completa en el Div Unificado
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (theaterDiv.requestFullscreen) {
+                    theaterDiv.requestFullscreen();
+                } else if (theaterDiv.webkitRequestFullscreen) {
+                    theaterDiv.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+		
         if (Hls.isSupported()) {
             const hls = new Hls();
             hls.loadSource(videoSrc);
