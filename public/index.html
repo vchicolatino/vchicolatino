@@ -1,0 +1,67 @@
+HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Videoreacción en Vivo</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { margin: 0; background-color: #0b0e14; color: #fff; font-family: sans-serif; }
+        .grid-container { display: grid; grid-template-columns: 1fr 350px; height: 100vh; }
+        .video-section { display: flex; flex-direction: column; padding: 10px; gap: 10px; box-sizing: border-box; }
+        .video-box { flex: 1; background: #000; position: relative; border-radius: 8px; overflow: hidden; }
+        video, iframe { width: 100%; height: 100%; border: none; }
+        .chat-section { height: 100vh; background: #191b1f; }
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <div class="video-section">
+            <!-- Video Sincronizado Privado -->
+            <div class="video-box">
+                <video id="videoPrivate" controls muted></video>
+            </div>
+            <!-- Emisión de Kick (Tu Cara / Cámara) -->
+            <div class="video-box">
+                <iframe src="https://player.kick.com/TU_USUARIO_KICK" allowfullscreen></iframe>
+            </div>
+        </div>
+        <!-- Chat Oficial de Kick -->
+        <div class="chat-section">
+            <iframe src="https://kick.com/popout/TU_USUARIO_KICK/chat"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoPrivate');
+        // Enlace al archivo .m3u8 que subirás a GitHub Releases o Cloudflare
+        const videoSrc = 'URL_DE_TU_ARCHIVO_STREAM.M3U8';
+        const socket = io();
+
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+        }
+
+        // Escuchar órdenes de sincronización en tiempo real
+        socket.on('sync-state', (data) => {
+            if(data.playing) {
+                video.currentTime = data.time;
+                video.play();
+            }
+        });
+
+        socket.on('play-video', (data) => {
+            video.currentTime = data.time;
+            video.play();
+        });
+
+        socket.on('pause-video', () => { video.pause(); });
+        socket.on('seek-video', (data) => { video.currentTime = data.time; });
+    </script>
+</body>
+</html>
