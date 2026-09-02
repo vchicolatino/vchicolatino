@@ -64,19 +64,23 @@ HTML
 
         cargarVideo();
 
-        // Iniciar o Reiniciar desde el segundo 0
+        // Iniciar o Reiniciar desde el segundo 0 (A prueba de fallos)
         socket.on('play-video', (data) => {
-            statusDiv.innerText = "Estado: Reproduciendo desde el inicio...";
-            video.currentTime = data.time || 0;
+            statusDiv.innerText = "Estado: Reiniciando video...";
             
-            // Forzar reproducción inmediata
-            const playPromise = video.play();
+            // 1. Asignar tiempo 0
+            video.currentTime = 0;
+
+            // 2. Intentar reproducir de inmediato
+            let playPromise = video.play();
+
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     statusDiv.innerText = "Estado: Reproduciendo...";
-                }).catch(err => {
-                    console.log("Bloqueo de autoplay:", err);
-                    statusDiv.innerText = "Haz clic en el video para iniciar la reproducción";
+                }).catch(error => {
+                    // Si el navegador bloqueó la reproducción por políticas de autoplay
+                    console.log("Error al reproducir automáticamente:", error);
+                    statusDiv.innerText = "Haz clic sobre el video para habilitar la reproducción";
                 });
             }
         });
@@ -89,10 +93,11 @@ HTML
 
         // Reanudar desde donde se pausó
         socket.on('resume-video', () => {
-            video.play().catch(err => {
+            video.play().then(() => {
+                statusDiv.innerText = "Estado: Reproduciendo...";
+            }).catch(err => {
                 statusDiv.innerText = "Haz clic en el video para reanudar";
             });
-            statusDiv.innerText = "Estado: Reproduciendo...";
         });
     </script>
 </body>
