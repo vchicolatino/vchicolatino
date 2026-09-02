@@ -25,56 +25,53 @@
 
         #status {
             background: #181c1e;
-            padding: 8px 15px;
-            font-size: 13px;
+            padding: 6px 15px;
+            font-size: 12px;
             color: #53fc18;
             text-align: center;
             border-bottom: 1px solid #282d30;
         }
 
-        /* Layout Principal */
         .main-layout {
             display: flex;
             flex: 1;
-            height: calc(100vh - 35px);
+            height: calc(100vh - 30px);
             width: 100%;
             position: relative;
         }
 
-        /* 1. CONTENEDOR UNIFICADO DE REPRODUCCIÓN (SE PUEDE MAXIMIZAR) */
+        /* CONTENEDOR UNIFICADO */
         .player-theater {
             flex: 1;
             position: relative;
             background: #000;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             width: 100%;
             height: 100%;
         }
 
-        /* Video Reacción Principal */
         #videoPrivate {
             width: 100%;
-            height: 100%;
+            height: calc(100% - 45px);
             object-fit: contain;
         }
 
-        #videoPrivate::-webkit-media-controls-play-button,
-        #videoPrivate::-webkit-media-controls-start-playback-button,
-        #videoPrivate::-webkit-media-controls-fullscreen-button {
+        /* Ocultar todos los controles nativos del HTML5 */
+        video::-webkit-media-controls {
             display: none !important;
-            -webkit-appearance: none;
         }
 
-        /* Cámara de Kick Recortada */
+        /* Cámara Recortada de Kick */
         .kick-crop-box {
             position: absolute;
-            bottom: 20px;
+            bottom: 60px;
             left: 20px;
-            width: 260px;
-            height: 190px;
-            border-radius: 12px;
+            width: 240px;
+            height: 175px;
+            border-radius: 10px;
             overflow: hidden;
             border: 2px solid #53fc18;
             box-shadow: 0 8px 24px rgba(0,0,0,0.8);
@@ -97,19 +94,19 @@
             top: 20px;
             right: 20px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
             z-index: 20;
         }
 
         .btn-kick {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 18px;
+            gap: 6px;
+            padding: 8px 14px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 6px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: transform 0.2s;
             animation: pulseAttention 5s infinite;
@@ -117,101 +114,149 @@
             border: none;
         }
 
-        .btn-follow {
-            background-color: #53fc18;
-            color: #000;
+        .btn-follow { background-color: #53fc18; color: #000; }
+        .btn-subscribe { background-color: #00e701; color: #000; animation-delay: 0.5s; }
+        .btn-kick:hover { transform: scale(1.05); }
+
+        /* BARRA DE CONTROLES UNIFICADA Y PERSONALIZADA */
+        .custom-controls-bar {
+            width: 100%;
+            height: 45px;
+            background: #121415;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 15px;
+            z-index: 30;
+            border-top: 1px solid #282d30;
         }
 
-        .btn-subscribe {
-            background-color: #00e701;
-            color: #000;
-            animation-delay: 0.5s;
+        /* Línea de tiempo bloqueada para que los usuarios no puedan arrastrarla libremente */
+        .progress-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .btn-fullscreen {
-            background-color: #282d30;
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+            pointer-events: none; /* Deshabilita clics para evitar adentrarnos o saltar el video */
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: #53fc18;
+            transition: width 0.2s linear;
+        }
+
+        .time-display {
+            font-size: 12px;
+            font-family: monospace;
+            color: #ccc;
+            white-space: nowrap;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            accent-color: #53fc18;
+            cursor: pointer;
+        }
+
+        .btn-fs-native {
+            background: transparent;
+            border: none;
             color: #fff;
-            animation: none; /* Sin vibración para el botón de maximizar */
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.2s;
         }
 
-        .btn-kick:hover {
-            transform: scale(1.08);
-        }
+        .btn-fs-native:hover { color: #53fc18; }
 
-        /* Estilos cuando la caja entra en Pantalla Completa */
-        .player-theater:fullscreen {
-            width: 100vw;
-            height: 100vh;
-        }
+        /* Estilos Pantalla Completa */
+        .player-theater:fullscreen { width: 100vw; height: 100vh; }
+        .player-theater:-webkit-full-screen { width: 100vw; height: 100vh; }
 
-        .player-theater:-webkit-full-screen {
-            width: 100vw;
-            height: 100vh;
-        }
-
-        /* 2. CHAT DE KICK */
+        /* Chat Lateral */
         .chat-container {
-            width: 340px;
+            width: 320px;
             height: 100%;
             background: #191b1f;
             border-left: 1px solid #282d30;
         }
 
-        .chat-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        .chat-container iframe { width: 100%; height: 100%; border: none; }
 
-        /* Animación Periódica de Atención */
         @keyframes pulseAttention {
-            0%, 80%, 100% {
-                transform: scale(1);
-            }
-            85% {
-                transform: scale(1.12) rotate(-3deg);
-            }
-            90% {
-                transform: scale(1.12) rotate(3deg);
-            }
-            95% {
-                transform: scale(1.08) rotate(0deg);
-            }
+            0%, 80%, 100% { transform: scale(1); }
+            85% { transform: scale(1.1) rotate(-2deg); }
+            90% { transform: scale(1.1) rotate(2deg); }
+            95% { transform: scale(1.05) rotate(0deg); }
         }
     </style>
 </head>
 <body>
-
     <div class="main-layout">
         
-        <!-- DIV UNIFICADO: Contiene Video, Cámara, Botones y Soporta Pantalla Completa -->
+        <!-- DIV UNIFICADO DE REPRODUCCIÓN -->
         <div id="playerTheater" class="player-theater">
             
-            <!-- Botones de Acción Kick + Botón Maximizar -->
+            <!-- Botones de Acción Kick -->
             <div class="kick-actions">
-                <!-- REEMPLAZA "TU_CANAL_KICK" por tu usuario exacto -->
-                <a href="https://kick.com/vchicolatino" target="_blank" class="btn-kick btn-follow">
-                    💚 Seguir en Kick
-                </a>
-                <a href="https://kick.com/vchicolatino/subscribe" target="_blank" class="btn-kick btn-subscribe">
-                    ⭐ Suscribirse
-                </a>
-                <button class="btn-kick btn-fullscreen" onclick="toggleFullscreen()">
-                    ⛶ Maximizar
-                </button>
+                <a href="https://kick.com/vchicolatino" target="_blank" class="btn-kick btn-follow">💚 Seguir</a>
+                <a href="https://kick.com/vchicolatino/subscribe" target="_blank" class="btn-kick btn-subscribe">⭐ Suscribirse</a>
             </div>
 
-            <!-- Video Reacción Principal -->
-            <video id="videoPrivate" controls controlsList="nodownload nofullscreen noremoteplayback"></video>
+            <!-- Video Reacción Principal sin Controles Nativos -->
+            <video id="videoPrivate" playsinline></video>
 
             <!-- Cámara Recortada de Kick -->
             <div class="kick-crop-box">
                 <iframe src="https://player.kick.com/vchicolatino" allowfullscreen="true"></iframe>
             </div>
 
+            <!-- BARRA DE CONTROLES UNIFICADA -->
+            <div class="custom-controls-bar">
+                
+                <!-- Progreso del Video y Tiempo Restante -->
+                <div class="progress-container">
+                    <div class="progress-bar-bg">
+                        <div id="progressFill" class="progress-bar-fill"></div>
+                    </div>
+                    <div id="timeDisplay" class="time-display">Restante: -00:00</div>
+                </div>
+
+                <!-- Control Unificado de Volumen -->
+                <div class="volume-container">
+                    🔊
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1" oninput="ajustarVolumen(this.value)">
+                </div>
+
+                <!-- Botón de Maximizar Todo el Div -->
+                <button class="btn-fs-native" onclick="toggleFullscreen()" title="Pantalla Completa">
+                    ⛶
+                </button>
+
+            </div>
+
         </div>
 
-        <!-- Panel del Chat de Kick -->
+        <!-- Chat de Kick -->
         <div class="chat-container">
             <iframe src="https://kick.com/popout/vchicolatino/chat"></iframe>
         </div>
@@ -220,11 +265,36 @@
 	<script>
         const video = document.getElementById('videoPrivate');
 		const theaterDiv = document.getElementById('playerTheater');
+        const progressFill = document.getElementById('progressFill');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const volumeSlider = document.getElementById('volumeSlider');
         // Enlace al archivo .m3u8 que subirás a GitHub Releases o Cloudflare
         const videoSrc = 'https://cdn.jsdelivr.net/gh/vchicolatino/vchicolatino@main/public/video/db/Peliculas/Freezer%20contra%20el%20padre%20de%20Goku/stream.m3u8'; 
         const socket = io();
 
-		// Función para activar/desactivar pantalla completa en el Div Unificado
+		// Actualiza el indicador visual de tiempo restante y la barra de avance
+        video.addEventListener('timeupdate', () => {
+            if (video.duration) {
+                const porcentaje = (video.currentTime / video.duration) * 100;
+                progressFill.style.width = `${porcentaje}%`;
+
+                const tiempoRestanteSegundos = video.duration - video.currentTime;
+                const mins = Math.floor(tiempoRestanteSegundos / 60);
+                const secs = Math.floor(tiempoRestanteSegundos % 60);
+                
+                const minsFormat = mins < 10 ? `0${mins}` : mins;
+                const secsFormat = secs < 10 ? `0${secs}` : secs;
+
+                timeDisplay.innerText = `Restante: -${minsFormat}:${secsFormat}`;
+            }
+        });
+
+        // Control unificado de Volumen
+        function ajustarVolumen(valor) {
+            video.volume = valor;
+        }
+
+        // Maximizar el DIV completo
         function toggleFullscreen() {
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
                 if (theaterDiv.requestFullscreen) {
