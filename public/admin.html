@@ -27,7 +27,7 @@
 
         function iniciarVideo() {
             estaPausado = false;
-            actualizarBotonPausa();
+            actualizarBotonPausa(); // Resetea el botón a "Pausar"
             socket.emit('play-video', { time: 0 });
         }
 
