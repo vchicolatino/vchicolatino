@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Control del Streamer</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #111; color: #fff; text-align: center; }
+        button { padding: 15px 25px; font-size: 18px; margin: 10px; cursor: pointer; border-radius: 5px; border: none; }
+        .btn-play { background: #28a745; color: white; }
+        .btn-pause { background: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Control Remoto de Transmisión</h1>
+    <button class="btn-play" onclick="play()">▶ Iniciar / Sincronizar</button>
+    <button class="btn-pause" onclick="pause()">⏸ Pausar</button>
+
+    <script>
+        const socket = io();
+        function play() { socket.emit('admin-play', { time: 0 }); }
+        function pause() { socket.emit('admin-pause'); }
+    </script>
+</body>
+</html>
