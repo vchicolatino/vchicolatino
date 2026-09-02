@@ -23,38 +23,8 @@
 
     <script>
         const socket = io();
-        let estaPausado = false;
-
-        function iniciarVideo() {
-            estaPausado = false;
-            actualizarBotonPausa(); // Resetea el botón a "Pausar"
-            socket.emit('play-video', { time: 0 });
-        }
-
-        function togglePausa() {
-            const btn = document.getElementById('btnPausa');
-            if (!estaPausado) {
-                // Pausar
-                estaPausado = true;
-                socket.emit('pause-video');
-            } else {
-                // Continuar/Reanudar
-                estaPausado = false;
-                socket.emit('resume-video');
-            }
-            actualizarBotonPausa();
-        }
-
-        function actualizarBotonPausa() {
-            const btn = document.getElementById('btnPausa');
-            if (estaPausado) {
-                btn.innerText = "▶ Continuar";
-                btn.className = "btn-resume";
-            } else {
-                btn.innerText = "⏸ Pausar";
-                btn.className = "btn-pause";
-            }
-        }
+        function play() { socket.emit('admin-play', { time: 0 }); }
+        function pause() { socket.emit('admin-pause'); }
     </script>
 </body>
 </html>
