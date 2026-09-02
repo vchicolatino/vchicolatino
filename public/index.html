@@ -35,33 +35,57 @@ HTML
 
     <script>
         const video = document.getElementById('videoPrivate');
-        // Enlace al archivo .m3u8 que subirás a GitHub Releases o Cloudflare
-        const videoSrc = 'https://cdn.jsdelivr.net/gh/vchicolatino/vchicolatino@main/public/video/db/Peliculas/Freezer%20contra%20el%20padre%20de%20Goku/stream.m3u8';
+        const statusDiv = document.getElementById('status');
+        
+        // Tu URL de jsDelivr
+        const videoSrc = 'PEGA_AQUI_TU_URL_DE_STREAM.M3U8'; 
         const socket = io();
+        let hls;
 
-        if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(videoSrc);
-            hls.attachMedia(video);
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = videoSrc;
+        function cargarVideo() {
+            if (Hls.isSupported()) {
+                if(hls) hls.destroy();
+                hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    statusDiv.innerText = "Estado: Video Cargado Correctamente";
+                });
+
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    console.error("Error HLS:", data);
+                    statusDiv.innerText = "Error al cargar el video";
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = videoSrc;
+            }
         }
 
-        // Escuchar órdenes de sincronización en tiempo real
-        socket.on('sync-state', (data) => {
-            if(data.playing) {
-                video.currentTime = data.time;
-                video.play();
-            }
-        });
+        cargarVideo();
 
+        // Iniciar desde el principio (o un tiempo específico)
         socket.on('play-video', (data) => {
-            video.currentTime = data.time;
-            video.play();
+            statusDiv.innerText = "Estado: Reproduciendo...";
+            video.currentTime = data.time || 0;
+            video.play().catch(err => {
+                statusDiv.innerText = "Haz clic en el video para reproducir";
+            });
         });
 
-        socket.on('pause-video', () => { video.pause(); });
-        socket.on('seek-video', (data) => { video.currentTime = data.time; });
+        // Pausar manteniéndose en el segundo actual
+        socket.on('pause-video', () => { 
+            video.pause(); 
+            statusDiv.innerText = "Estado: Pausado";
+        });
+
+        // NUEVO: Reanudar desde donde se pausó
+        socket.on('resume-video', () => {
+            video.play().catch(err => {
+                statusDiv.innerText = "Haz clic en el video para reanudar";
+            });
+            statusDiv.innerText = "Estado: Reproduciendo...";
+        });
     </script>
 </body>
 </html>

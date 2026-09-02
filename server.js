@@ -29,6 +29,11 @@ io.on('connection', (socket) => {
         currentVideoTime = time;
         io.emit('seek-video', { time: currentVideoTime });
     });
+	
+	// NUEVO EVENTO: Reanudar reproducción
+	socket.on('resume-video', () => {
+		io.emit('resume-video');
+	});
 });
 
 const PORT = process.env.PORT || 3000;

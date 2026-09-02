@@ -2,24 +2,59 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Control del Streamer</title>
+    <title>Panel de Control - Streamer</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #111; color: #fff; text-align: center; }
-        button { padding: 15px 25px; font-size: 18px; margin: 10px; cursor: pointer; border-radius: 5px; border: none; }
-        .btn-play { background: #28a745; color: white; }
-        .btn-pause { background: #dc3545; color: white; }
+        body { font-family: sans-serif; background: #121212; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e1e1e; padding: 20px 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; width: 300px; }
+        button { width: 100%; margin: 8px 0; padding: 12px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-start { background: #28a745; color: white; }
+        .btn-pause { background: #ffc107; color: black; }
+        .btn-resume { background: #17a2b8; color: white; }
+        button:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
-    <h1>Control Remoto de Transmisión</h1>
-    <button class="btn-play" onclick="play()">▶ Iniciar / Sincronizar</button>
-    <button class="btn-pause" onclick="pause()">⏸ Pausar</button>
+    <div class="card">
+        <h2>Control de Transmisión</h2>
+        <button class="btn-start" onclick="iniciarVideo()">▶ Reiniciar desde el inicio</button>
+        <button id="btnPausa" class="btn-pause" onclick="togglePausa()">⏸ Pausar</button>
+    </div>
 
     <script>
         const socket = io();
-        function play() { socket.emit('admin-play', { time: 0 }); }
-        function pause() { socket.emit('admin-pause'); }
+        let estaPausado = false;
+
+        function iniciarVideo() {
+            estaPausado = false;
+            actualizarBotonPausa();
+            socket.emit('play-video', { time: 0 });
+        }
+
+        function togglePausa() {
+            const btn = document.getElementById('btnPausa');
+            if (!estaPausado) {
+                // Pausar
+                estaPausado = true;
+                socket.emit('pause-video');
+            } else {
+                // Continuar/Reanudar
+                estaPausado = false;
+                socket.emit('resume-video');
+            }
+            actualizarBotonPausa();
+        }
+
+        function actualizarBotonPausa() {
+            const btn = document.getElementById('btnPausa');
+            if (estaPausado) {
+                btn.innerText = "▶ Continuar";
+                btn.className = "btn-resume";
+            } else {
+                btn.innerText = "⏸ Pausar";
+                btn.className = "btn-pause";
+            }
+        }
     </script>
 </body>
 </html>
