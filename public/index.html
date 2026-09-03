@@ -69,30 +69,33 @@
             display: none !important;
         }
 
-        /* Cámara Recortada de Kick (Versión Escritorio) */
-        .kick-crop-box {
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            width: 175px;
-            height: 240px;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid #53fc18;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.8);
-            background: #000;
-            justify-content: center;
-            align-items: center;
-            display: flex;
-            z-index: 10;
-        }
+		/* Cámara Recortada de Kick (Sin franjas negras) */
+		.kick-crop-box {
+			position: absolute;
+			top: 70px;
+			right: 20px;
+			width: 175px;
+			height: 240px;
+			border-radius: 10px;
+			overflow: hidden;
+			border: 2px solid #53fc18;
+			box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+			background: #000;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 10;
+		}
 
-        .kick-crop-box iframe {
-            width: 400%;
-            height: 100%;
-            border: none;
-            pointer-events: none;
-        }
+		/* Escalar iframe para forzar llenado vertical completo */
+		.kick-crop-box iframe {
+			width: 350%; /* Aumentado para eliminar bordes laterales y cubrir alto */
+			height: 100%;
+			transform: scale(1.2); /* Amplía levemente la señal para eliminar franjas negras arriba/abajo */
+			transform-origin: center center;
+			border: none;
+			pointer-events: none; /* Mantiene el clic transparente hacia la interfaz */
+		}
 
         /* Botones Flotantes de Kick */
         .kick-actions {
@@ -371,10 +374,15 @@
             <!-- Video Reacción Principal -->
             <video id="videoPrivate" playsinline muted></video>
 
-            <!-- Cámara Recortada de Kick -->
-            <div class="kick-crop-box">
-                <iframe src="https://player.kick.com/vchicolatino" allowfullscreen="true"></iframe>
-            </div>
+			<!-- Cámara Recortada de Kick con permisos de audio habilitados -->
+			<div class="kick-crop-box">
+				<iframe 
+					id="kickIframe"
+					src="https://player.kick.com/vchicolatino?autoplay=true&muted=false" 
+					allow="autoplay; encrypted-media; picture-in-picture"
+					allowfullscreen="true">
+				</iframe>
+			</div>
 
             <!-- BARRA DE CONTROLES UNIFICADA -->
             <div class="custom-controls-bar">
@@ -506,32 +514,51 @@
             }
         }
 
-        function ajustarVolumen(valor) {
-            video.volume = valor;
-            if (valor > 0) {
-                video.muted = false;
-                ultimoVolumen = valor;
-            } else {
-                video.muted = true;
-            }
-            actualizarIconoVolumen(video.muted ? 0 : valor);
-        }
+        function desmutearKick() {
+			const kickIframe = document.getElementById('kickIframe');
+			// Forzamos la recarga del iframe permitiendo audio tras la interacción del usuario
+			if (kickIframe) {
+				kickIframe.src = "https://player.kick.com/vchicolatino?autoplay=true&muted=false";
+			}
+		}
 
-        function toggleMute() {
-            if (video.muted || video.volume === 0) {
-                const nuevoVol = ultimoVolumen > 0 ? ultimoVolumen : 1;
-                video.muted = false;
-                video.volume = nuevoVol;
-                volumeSlider.value = nuevoVol;
-                actualizarIconoVolumen(nuevoVol);
-            } else {
-                ultimoVolumen = video.volume;
-                video.muted = true;
-                video.volume = 0;
-                volumeSlider.value = 0;
-                actualizarIconoVolumen(0);
-            }
-        }
+		function mutearKick() {
+			const kickIframe = document.getElementById('kickIframe');
+			if (kickIframe) {
+				kickIframe.src = "https://player.kick.com/vchicolatino?autoplay=true&muted=true";
+			}
+		}
+
+		function ajustarVolumen(valor) {
+			video.volume = valor;
+			if (valor > 0) {
+				if (video.muted) desmutearKick();
+				video.muted = false;
+				ultimoVolumen = valor;
+			} else {
+				video.muted = true;
+				mutearKick();
+			}
+			actualizarIconoVolumen(video.muted ? 0 : valor);
+		}
+
+		function toggleMute() {
+			if (video.muted || video.volume === 0) {
+				const nuevoVol = ultimoVolumen > 0 ? ultimoVolumen : 1;
+				video.muted = false;
+				video.volume = nuevoVol;
+				volumeSlider.value = nuevoVol;
+				actualizarIconoVolumen(nuevoVol);
+				desmutearKick(); // Activa audio en Kick
+			} else {
+				ultimoVolumen = video.volume;
+				video.muted = true;
+				video.volume = 0;
+				volumeSlider.value = 0;
+				actualizarIconoVolumen(0);
+				mutearKick(); // Silencia Kick
+			}
+		}
 
         function intentarReproducirConAudio() {
             video.muted = false;
