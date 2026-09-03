@@ -52,6 +52,40 @@
             width: 100%;
             height: 100%;
         }
+		
+		/* CONTENEDOR ESPECÍFICO DE VIDEO Y LABELS */
+        .video-wrapper {
+            width: calc(100% - 150px);
+            height: calc(100% - 45px);
+            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .video-label {
+            width: 100%;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 4px 6px;
+        }
+
+        .video-label-top {
+            text-align: left;
+            color: #53fc18;
+        }
+
+        .video-label-bottom {
+            text-align: center;
+            color: #cccccc;
+            font-size: 13px;
+        }
 
         #videoPrivate {
             width: calc(100% - 150px);
@@ -290,6 +324,11 @@
                 height: auto;
             }
 
+			.video-wrapper { 
+				width: calc(100% - 20px) !important;
+				margin-left: 10px;
+			}
+			
             /* Reducción del 10% en el alto del contenedor principal */
             .player-theater {
                 height: calc(90vh - 30px) !important;
@@ -371,9 +410,13 @@
                 <a href="https://kick.com/vchicolatino/subscribe" target="_blank" class="btn-kick btn-subscribe">⭐ Suscribirse</a>
             </div>
 
-            <!-- Video Reacción Principal -->
-            <video id="videoPrivate" playsinline muted></video>
-
+            <!-- CONTENEDOR CON LABELS Y VIDEO -->
+            <div class="video-wrapper">
+                <div id="labelTop" class="video-label video-label-top"></div>
+                <video id="videoPrivate" playsinline muted></video>
+                <div id="labelBottom" class="video-label video-label-bottom"></div>
+            </div>
+			
 			<!-- Cámara Recortada de Kick con permisos de audio habilitados -->
 			<div class="kick-crop-box">
 				<iframe 
@@ -432,7 +475,9 @@
         const btnVolume = document.getElementById('btnVolume');
         const btnLive = document.getElementById('btnLive');
         const chatContainer = document.getElementById('chatContainer');
-
+		const labelTop = document.getElementById('labelTop');
+        const labelBottom = document.getElementById('labelBottom');
+		
         const videoSrc = 'https://cdn.jsdelivr.net/gh/vchicolatino/vchicolatino@main/public/video/db/Peliculas/Freezer%20contra%20el%20padre%20de%20Goku/stream.m3u8'; 
         const socket = io();
 
@@ -636,6 +681,12 @@
             }
         }
 
+		// ESCUCHADORES WEBSOCKET
+        socket.on('update-titles', (data) => {
+            labelTop.innerText = data.titleTop;
+            labelBottom.innerText = data.titleBottom;
+        });
+		
         socket.on('sync-state', (data) => {
             if(data.playing) {
                 video.currentTime = data.time;
