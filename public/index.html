@@ -228,6 +228,22 @@
             gap: 8px;
             font-size: 13px;
         }
+		
+		/* BOTÓN DE BOCINA INTERACTIVO */
+        .btn-volume-icon {
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+
+        .btn-volume-icon:hover {
+            transform: scale(1.15);
+        }
 
         .volume-slider {
             width: 80px;
@@ -307,9 +323,11 @@
 
                 <!-- Control Unificado de Volumen -->
                 <div class="volume-container">
-                    🔊
-                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="0" oninput="ajustarVolumen(this.value)">
+                    <!-- ICONO INTERACTIVO DE BOCINA -->
+                    <button id="btnVolume" class="btn-volume-icon" onclick="toggleMute()" title="Silenciar / Activar sonido">🔊</button>
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1" oninput="ajustarVolumen(this.value)">
                 </div>
+				</div>
 
                 <!-- Botón de Maximizar Todo el Div -->
                 <button class="btn-fs-native" onclick="toggleFullscreen()" title="Pantalla Completa">
@@ -332,6 +350,7 @@
         const progressFill = document.getElementById('progressFill');
         const timeDisplay = document.getElementById('timeDisplay');
         const volumeSlider = document.getElementById('volumeSlider');
+		const btnVolume = document.getElementById('btnVolume');
 		const btnLive = document.getElementById('btnLive');
         // Enlace al archivo .m3u8 que subirás a GitHub Releases o Cloudflare
         const videoSrc = 'https://cdn.jsdelivr.net/gh/vchicolatino/vchicolatino@main/public/video/db/Peliculas/Freezer%20contra%20el%20padre%20de%20Goku/stream.m3u8'; 
@@ -341,6 +360,16 @@
         let targetLiveTime = 0;
         let lastSyncTimestamp = 0;
         let isStreamActive = false;
+		let ultimoVolumen = 1; // Guarda el nivel antes de mutear
+		
+		// Desbloquear audio/video con cualquier primer clic si el navegador lo requiere
+        document.addEventListener('click', () => {
+            if (video.paused && isStreamActive) {
+                video.muted = false;
+                video.volume = volumeSlider.value > 0 ? volumeSlider.value : 1;
+                video.play().catch(e => console.log(e));
+            }
+        }, { once: true });
 
         function calcularTiempoActualTransmision() {
             if (!isStreamActive || lastSyncTimestamp === 0) return 0;
@@ -397,16 +426,64 @@
             btnLive.classList.add('is-live');
         }
 		
+		/* MANEJO DE VOLUMEN Y BOCINA CLICKEABLE */
+        function actualizarIconoVolumen(vol) {
+            if (vol == 0 || video.muted) {
+                btnVolume.innerText = '🔇';
+            } else if (vol < 0.5) {
+                btnVolume.innerText = '🔉';
+            } else {
+                btnVolume.innerText = '🔊';
+            }
+        }
+		
         // Control unificado de Volumen
         function ajustarVolumen(valor) {
             video.volume = valor;
             if (valor > 0) {
                 video.muted = false; // Desmutea automáticamente cuando el espectador desliza el volumen
-            } else {
+				ultimoVolumen = valor;
+			} else {
                 video.muted = true;
             }
+			actualizarIconoVolumen(video.muted ? 0 : valor);
         }
 
+		function toggleMute() {
+            if (video.muted || video.volume === 0) {
+                // Activar volumen al 100% (o al último volumen conocido)
+                const nuevoVol = ultimoVolumen > 0 ? ultimoVolumen : 1;
+                video.muted = false;
+                video.volume = nuevoVol;
+                volumeSlider.value = nuevoVol;
+                actualizarIconoVolumen(nuevoVol);
+            } else {
+                // Mutear
+                ultimoVolumen = video.volume;
+                video.muted = true;
+                video.volume = 0;
+                volumeSlider.value = 0;
+                actualizarIconoVolumen(0);
+            }
+        }
+		
+		// Control de reproducción con intento prioritario con Audio
+        function intentarReproducirConAudio() {
+            video.muted = false;
+            video.volume = volumeSlider.value > 0 ? volumeSlider.value : 1;
+            
+            video.play().then(() => {
+                actualizarIconoVolumen(video.volume);
+            }).catch(err => {
+                // Si el navegador bloquea el audio desmuteado al inicio, reproduce en Muted temporalmente
+                console.log("Autoplay con audio bloqueado por el navegador. Iniciando en Muted...");
+                video.muted = true;
+                actualizarIconoVolumen(0);
+                volumeSlider.value = 0;
+                video.play();
+            });
+        }
+		
         // Maximizar el DIV completo
         function toggleFullscreen() {
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
@@ -457,7 +534,8 @@
                 lastSyncTimestamp = Date.now();
                 video.currentTime = data.time;
             }
-            video.play().catch(err => console.log("Autoplay Muted:", err));
+            //video.play().catch(err => console.log("Autoplay Muted:", err));
+			intentarReproducirConAudio();
         });
 
         socket.on('pause-video', () => { 
@@ -473,8 +551,8 @@
                 lastSyncTimestamp = Date.now();
                 video.currentTime = data.time;
             }
-            video.play();
-            statusDiv.innerText = "Estado: Transmisión en vivo";
+            //video.play();
+			intentarReproducirConAudio();
         });
 		
         socket.on('seek-video', (data) => { video.currentTime = data.time; });
