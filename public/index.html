@@ -235,7 +235,7 @@
             </div>
 
             <!-- Video Reacción Principal sin Controles Nativos -->
-            <video id="videoPrivate" playsinline></video>
+            <video id="videoPrivate" playsinline muted></video>
 
             <!-- Cámara Recortada de Kick -->
             <div class="kick-crop-box">
@@ -256,7 +256,7 @@
                 <!-- Control Unificado de Volumen -->
                 <div class="volume-container">
                     🔊
-                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1" oninput="ajustarVolumen(this.value)">
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="0" oninput="ajustarVolumen(this.value)">
                 </div>
 
                 <!-- Botón de Maximizar Todo el Div -->
@@ -285,13 +285,13 @@
         const socket = io();
 
 		// Desbloquea permisos en el momento que el usuario haga clic en cualquier parte de la pantalla o video
-        document.addEventListener('click', () => {
+        /*document.addEventListener('click', () => {
             if (video.paused) {
                 video.play().then(() => {
                     video.pause(); // Mantiene en pausa hasta que el servidor mande 'play-video'
                 }).catch(() => {});
             }
-        }, { once: true });
+        }, { once: true });*/
 		
 		// Actualiza el indicador visual de tiempo restante y la barra de avance
         video.addEventListener('timeupdate', () => {
@@ -321,6 +321,11 @@
         // Control unificado de Volumen
         function ajustarVolumen(valor) {
             video.volume = valor;
+            if (valor > 0) {
+                video.muted = false; // Desmutea automáticamente cuando el espectador desliza el volumen
+            } else {
+                video.muted = true;
+            }
         }
 
         // Maximizar el DIV completo
