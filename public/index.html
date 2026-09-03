@@ -70,9 +70,10 @@
             font-weight: bold;
             color: #ffffff;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            /* Configuración para permitir saltos de línea */
+			white-space: normal;       /* Permite que el texto baje a la siguiente línea */
+			word-break: break-word;     /* Rompe palabras muy largas si no caben */
+			overflow-wrap: break-word; /* Asegura el ajuste en navegadores modernos */
             padding: 4px 6px;
         }
 
@@ -325,7 +326,7 @@
             }
 
 			.video-wrapper { 
-				width: calc(100% - 20px) !important;
+				width: calc(100% - 80px) !important;
 				margin-left: 10px;
 			}
 			
