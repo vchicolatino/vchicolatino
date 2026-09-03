@@ -11,8 +11,8 @@ let streamState = {
     isPlaying: false,
     startTime: null,      // Fecha/hora exacta de cuando se presionó "Iniciar"
     startOffset: 0,       // Tiempo de inicio del video en segundos
-    titleTop: "Título por defecto",    // Texto del Label superior
-    titleBottom: "Mensaje por defecto" // Texto del Label inferior
+    titleTop: "BIENVENIDO GUERRERO",    // Texto del Label superior
+    titleBottom: "" // Texto del Label inferior
 };
 
 io.on('connection', (socket) => {
