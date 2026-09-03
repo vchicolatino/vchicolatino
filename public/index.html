@@ -143,6 +143,53 @@
             border-top: 1px solid #282d30;
         }
 
+		/* BOTÓN EN VIVO */
+        .btn-live {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            color: #777; /* Estado gris por defecto */
+        }
+
+        .btn-live .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #777;
+            display: inline-block;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Estado Activo: EN VIVO (Rojo) */
+        .btn-live.is-live {
+            color: #ff3333;
+        }
+
+        .btn-live.is-live .live-dot {
+            background-color: #ff3333;
+            box-shadow: 0 0 8px rgba(255, 51, 51, 0.8);
+            animation: blinkLive 1.5s infinite;
+        }
+
+        .btn-live:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes blinkLive {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+		
         /* Línea de tiempo bloqueada para que los usuarios no puedan arrastrarla libremente */
         .progress-container {
             flex: 1;
@@ -245,6 +292,11 @@
             <!-- BARRA DE CONTROLES UNIFICADA -->
             <div class="custom-controls-bar">
                 
+				<!-- BOTÓN EN VIVO -->
+                <button id="btnLive" class="btn-live" onclick="irAlEnVivo()" title="Hacer clic para volver al en vivo">
+                    <span class="live-dot"></span> EN VIVO
+                </button>
+				
                 <!-- Progreso del Video y Tiempo Restante -->
                 <div class="progress-container">
                     <div class="progress-bar-bg">
@@ -280,18 +332,21 @@
         const progressFill = document.getElementById('progressFill');
         const timeDisplay = document.getElementById('timeDisplay');
         const volumeSlider = document.getElementById('volumeSlider');
+		const btnLive = document.getElementById('btnLive');
         // Enlace al archivo .m3u8 que subirás a GitHub Releases o Cloudflare
         const videoSrc = 'https://cdn.jsdelivr.net/gh/vchicolatino/vchicolatino@main/public/video/db/Peliculas/Freezer%20contra%20el%20padre%20de%20Goku/stream.m3u8'; 
         const socket = io();
 
-		// Desbloquea permisos en el momento que el usuario haga clic en cualquier parte de la pantalla o video
-        /*document.addEventListener('click', () => {
-            if (video.paused) {
-                video.play().then(() => {
-                    video.pause(); // Mantiene en pausa hasta que el servidor mande 'play-video'
-                }).catch(() => {});
-            }
-        }, { once: true });*/
+		// Variables para controlar la sincronización del Live
+        let targetLiveTime = 0;
+        let lastSyncTimestamp = 0;
+        let isStreamActive = false;
+
+        function calcularTiempoActualTransmision() {
+            if (!isStreamActive || lastSyncTimestamp === 0) return 0;
+            const transcurrido = (Date.now() - lastSyncTimestamp) / 1000;
+            return targetLiveTime + transcurrido;
+        }
 		
 		// Actualiza el indicador visual de tiempo restante y la barra de avance
         video.addEventListener('timeupdate', () => {
@@ -307,6 +362,21 @@
                 const secsFormat = secs < 10 ? `0${secs}` : secs;
 
                 timeDisplay.innerText = `Restante: -${minsFormat}:${secsFormat}`;
+				
+				// VERIFICAR SI EL USUARIO ESTÁ EN EL TIEMPO EXACTO DEL EN VIVO
+                if (isStreamActive) {
+                    const tiempoRealTransmision = calcularTiempoActualTransmision();
+                    const diferencia = Math.abs(tiempoRealTransmision - video.currentTime);
+
+                    // Si está a menos de 2.5 segundos del tiempo real, se considera "EN VIVO"
+                    if (diferencia <= 2.5) {
+                        btnLive.classList.add('is-live');
+                    } else {
+                        btnLive.classList.remove('is-live');
+                    }
+                } else {
+                    btnLive.classList.remove('is-live');
+                }
             }
         });
 
@@ -316,6 +386,15 @@
             hls.attachMedia(video);
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = videoSrc;
+        }
+		
+		// FUNCIÓN AL HACER CLIC EN EL BOTÓN "EN VIVO"
+        function irAlEnVivo() {
+            if (!isStreamActive) return;
+            const tiempoReal = calcularTiempoActualTransmision();
+            video.currentTime = tiempoReal;
+            video.play().catch(e => console.log(e));
+            btnLive.classList.add('is-live');
         }
 		
         // Control unificado de Volumen
@@ -353,13 +432,12 @@
             }
         });
 
-        socket.on('play-video', (data) => {
+        /*socket.on('play-video', (data) => {
             video.currentTime = data.time;
             video.play();
         });
-
-        socket.on('pause-video', () => { video.pause(); });
-        socket.on('seek-video', (data) => { video.currentTime = data.time; });
+		
+		socket.on('pause-video', () => { video.pause(); });
 		
 		// NUEVO: Reanudar desde donde se pausó
         socket.on('resume-video', () => {
@@ -368,6 +446,40 @@
             });
             //statusDiv.innerText = "Estado: Reproduciendo...";
         });
+        */
+		
+		// Escuchadores de eventos WebSocket
+        socket.on('play-video', (data) => {
+            isStreamActive = true;
+            
+            if (data.time !== undefined) {
+                targetLiveTime = data.time;
+                lastSyncTimestamp = Date.now();
+                video.currentTime = data.time;
+            }
+            video.play().catch(err => console.log("Autoplay Muted:", err));
+        });
+
+        socket.on('pause-video', () => { 
+            video.pause(); 
+            isStreamActive = false;
+            btnLive.classList.remove('is-live');
+        });
+
+		socket.on('resume-video', (data) => {
+            isStreamActive = true;
+            if (data && data.time !== undefined) {
+                targetLiveTime = data.time;
+                lastSyncTimestamp = Date.now();
+                video.currentTime = data.time;
+            }
+            video.play();
+            statusDiv.innerText = "Estado: Transmisión en vivo";
+        });
+		
+        socket.on('seek-video', (data) => { video.currentTime = data.time; });
+		
+		
     </script>
 </body>
 </html>
