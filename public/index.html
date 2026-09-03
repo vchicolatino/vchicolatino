@@ -529,7 +529,7 @@
 			}
 		}
 
-		function ajustarVolumen(valor) {
+		/*function ajustarVolumen(valor) {
 			video.volume = valor;
 			if (valor > 0) {
 				if (video.muted) desmutearKick();
@@ -558,8 +558,54 @@
 				actualizarIconoVolumen(0);
 				mutearKick(); // Silencia Kick
 			}
+		}*/
+
+		/* MANEJO DE VOLUMEN UNIFICADO SIN RECARGAR EL IFRAME DE KICK */
+		function ajustarVolumen(valor) {
+			video.volume = valor;
+			if (valor > 0) {
+				video.muted = false;
+				ultimoVolumen = valor;
+			} else {
+				video.muted = true;
+			}
+			actualizarIconoVolumen(video.muted ? 0 : valor);
+			
+			// Enviamos el mensaje de volumen al iframe sin recargar la página
+			sincronizarAudioKick(video.muted ? 0 : valor);
+		}
+		
+		function toggleMute() {
+			if (video.muted || video.volume === 0) {
+				const nuevoVol = ultimoVolumen > 0 ? ultimoVolumen : 1;
+				video.muted = false;
+				video.volume = nuevoVol;
+				volumeSlider.value = nuevoVol;
+				actualizarIconoVolumen(nuevoVol);
+				sincronizarAudioKick(nuevoVol);
+			} else {
+				ultimoVolumen = video.volume;
+				video.muted = true;
+				video.volume = 0;
+				volumeSlider.value = 0;
+				actualizarIconoVolumen(0);
+				sincronizarAudioKick(0);
+			}
 		}
 
+		function sincronizarAudioKick(nivelVolumen) {
+			const kickIframe = document.getElementById('kickIframe');
+			if (kickIframe && kickIframe.contentWindow) {
+				// Enviar señal de mutear/desmutear mediante postMessage al reproductor incrustado
+				const mensaje = nivelVolumen === 0 ? 'mute' : 'unmute';
+				kickIframe.contentWindow.postMessage(JSON.stringify({
+					event: mensaje,
+					method: 'setVolume',
+					value: nivelVolumen
+				}), '*');
+			}
+		}
+		
         function intentarReproducirConAudio() {
             video.muted = false;
             video.volume = volumeSlider.value > 0 ? volumeSlider.value : 1;
