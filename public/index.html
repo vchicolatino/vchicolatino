@@ -47,10 +47,8 @@
             background: #000;
             display: flex;
             flex-direction: column;
-			justify-content: flex-start; /* Alinea los elementos arriba */
-            align-items: flex-start;     /* Pega el contenido a la izquierda */
-            //justify-content: center;
-            //align-items: center;
+            justify-content: flex-start;
+            align-items: flex-start;
             width: 100%;
             height: 100%;
         }
@@ -58,21 +56,20 @@
         #videoPrivate {
             width: calc(100% - 150px);
             height: calc(100% - 45px);
-			margin-left: 20px;
-			margin-top: 20px;
-			margin-bottom: 20px;
-			border-radius: 10px;
+            margin-left: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
             border: 2px solid #53fc18;
             box-shadow: 0 8px 24px rgba(0,0,0,0.8);
             object-fit: contain;
         }
 
-        /* Ocultar todos los controles nativos del HTML5 */
         video::-webkit-media-controls {
             display: none !important;
         }
 
-        /* Cámara Recortada de Kick */
+        /* Cámara Recortada de Kick (Versión Escritorio) */
         .kick-crop-box {
             position: absolute;
             top: 70px;
@@ -84,18 +81,15 @@
             border: 2px solid #53fc18;
             box-shadow: 0 8px 24px rgba(0,0,0,0.8);
             background: #000;
-			justify-content: center;
-			align-items: center;
-			display: center;
+            justify-content: center;
+            align-items: center;
+            display: flex;
             z-index: 10;
         }
 
         .kick-crop-box iframe {
             width: 250%;
             height: 100%;
-			margin-right 100px
-			justify-content: center;
-			align-items: center;
             border: none;
             pointer-events: none;
         }
@@ -130,7 +124,7 @@
         .btn-subscribe { background-color: #00e701; color: #000; animation-delay: 0.5s; }
         .btn-kick:hover { transform: scale(1.05); }
 
-        /* BARRA DE CONTROLES UNIFICADA Y PERSONALIZADA */
+        /* BARRA DE CONTROLES UNIFICADA */
         .custom-controls-bar {
             width: 100%;
             height: 45px;
@@ -143,7 +137,7 @@
             border-top: 1px solid #282d30;
         }
 
-		/* BOTÓN EN VIVO */
+        /* BOTÓN EN VIVO */
         .btn-live {
             display: flex;
             align-items: center;
@@ -158,7 +152,7 @@
             padding: 4px 8px;
             border-radius: 4px;
             transition: all 0.2s ease;
-            color: #777; /* Estado gris por defecto */
+            color: #777;
         }
 
         .btn-live .live-dot {
@@ -170,10 +164,7 @@
             transition: background-color 0.2s ease;
         }
 
-        /* Estado Activo: EN VIVO (Rojo) */
-        .btn-live.is-live {
-            color: #ff3333;
-        }
+        .btn-live.is-live { color: #ff3333; }
 
         .btn-live.is-live .live-dot {
             background-color: #ff3333;
@@ -181,16 +172,13 @@
             animation: blinkLive 1.5s infinite;
         }
 
-        .btn-live:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
+        .btn-live:hover { background: rgba(255, 255, 255, 0.05); }
 
         @keyframes blinkLive {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
-		
-        /* Línea de tiempo bloqueada para que los usuarios no puedan arrastrarla libremente */
+
         .progress-container {
             flex: 1;
             display: flex;
@@ -205,7 +193,7 @@
             border-radius: 3px;
             position: relative;
             overflow: hidden;
-            pointer-events: none; /* Deshabilita clics para evitar adentrarnos o saltar el video */
+            pointer-events: none;
         }
 
         .progress-bar-fill {
@@ -228,8 +216,7 @@
             gap: 8px;
             font-size: 13px;
         }
-		
-		/* BOTÓN DE BOCINA INTERACTIVO */
+
         .btn-volume-icon {
             background: transparent;
             border: none;
@@ -241,9 +228,7 @@
             transition: transform 0.1s ease;
         }
 
-        .btn-volume-icon:hover {
-            transform: scale(1.15);
-        }
+        .btn-volume-icon:hover { transform: scale(1.15); }
 
         .volume-slider {
             width: 80px;
@@ -263,7 +248,6 @@
 
         .btn-fs-native:hover { color: #53fc18; }
 
-        /* Estilos Pantalla Completa */
         .player-theater:fullscreen { width: 100vw; height: 100vh; }
         .player-theater:-webkit-full-screen { width: 100vw; height: 100vh; }
 
@@ -273,6 +257,12 @@
             height: 100%;
             background: #191b1f;
             border-left: 1px solid #282d30;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-toggle-chat {
+            display: none; /* Oculto en PC */
         }
 
         .chat-container iframe { width: 100%; height: 100%; border: none; }
@@ -282,6 +272,87 @@
             85% { transform: scale(1.1) rotate(-2deg); }
             90% { transform: scale(1.1) rotate(2deg); }
             95% { transform: scale(1.05) rotate(0deg); }
+        }
+
+        /* =========================================================
+           VISTA ADAPTADA PARA DISPOSITIVOS MÓVILES (Móvil/Tablet)
+           ========================================================= */
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto; /* Permitir scroll si es necesario */
+            }
+
+            .main-layout {
+                flex-direction: column;
+                height: auto;
+            }
+
+            /* Reducción del 10% en el alto del contenedor principal */
+            .player-theater {
+                height: calc(90vh - 30px) !important;
+                min-height: 380px;
+                width: 100%;
+            }
+
+            #videoPrivate {
+                width: calc(100% - 20px) !important;
+                margin-left: 10px;
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+
+            /* Reducción del 10% en el contenedor de Kick (175x240 -> 157x216) */
+            .kick-crop-box {
+                width: 157px !important;
+                height: 216px !important;
+                top: 60px;
+                right: 10px;
+            }
+
+            .kick-actions {
+                top: 10px;
+                right: 10px;
+            }
+
+            .btn-kick {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+
+            .volume-slider {
+                width: 50px; /* Ajuste del slider para pantallas angostas */
+            }
+
+            /* Chat Desplegable */
+            .chat-container {
+                width: 100%;
+                height: 400px;
+                border-left: none;
+                border-top: 1px solid #282d30;
+                transition: max-height 0.3s ease;
+            }
+
+            .btn-toggle-chat {
+                display: block;
+                width: 100%;
+                background: #181c1e;
+                color: #53fc18;
+                border: none;
+                padding: 8px;
+                font-size: 12px;
+                font-weight: bold;
+                cursor: pointer;
+                border-bottom: 1px solid #282d30;
+                text-align: center;
+            }
+
+            .chat-container.collapsed iframe {
+                display: none;
+            }
+
+            .chat-container.collapsed {
+                height: auto;
+            }
         }
     </style>
 </head>
@@ -297,7 +368,7 @@
                 <a href="https://kick.com/vchicolatino/subscribe" target="_blank" class="btn-kick btn-subscribe">⭐ Suscribirse</a>
             </div>
 
-            <!-- Video Reacción Principal sin Controles Nativos -->
+            <!-- Video Reacción Principal -->
             <video id="videoPrivate" playsinline muted></video>
 
             <!-- Cámara Recortada de Kick -->
@@ -308,25 +379,24 @@
             <!-- BARRA DE CONTROLES UNIFICADA -->
             <div class="custom-controls-bar">
                 
-				<!-- BOTÓN EN VIVO -->
+                <!-- BOTÓN EN VIVO -->
                 <button id="btnLive" class="btn-live" onclick="irAlEnVivo()" title="Hacer clic para volver al en vivo">
                     <span class="live-dot"></span> EN VIVO
                 </button>
-				
+                
                 <!-- Progreso del Video y Tiempo Restante -->
                 <div class="progress-container">
                     <div class="progress-bar-bg">
                         <div id="progressFill" class="progress-bar-fill"></div>
                     </div>
-                    <div id="timeDisplay" class="time-display">Restante: -00:00</div>
+                    <div id="timeDisplay" class="time-display">-00:00</div>
                 </div>
 
                 <!-- Control Unificado de Volumen -->
                 <div class="volume-container">
-                    <!-- ICONO INTERACTIVO DE BOCINA -->
                     <button id="btnVolume" class="btn-volume-icon" onclick="toggleMute()" title="Silenciar / Activar sonido">🔊</button>
                     <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1" oninput="ajustarVolumen(this.value)">
-				</div>
+                </div>
 
                 <!-- Botón de Maximizar Todo el Div -->
                 <button class="btn-fs-native" onclick="toggleFullscreen()" title="Pantalla Completa">
@@ -337,31 +407,32 @@
 
         </div>
 
-        <!-- Chat de Kick -->
-        <div class="chat-container">
+        <!-- Chat de Kick (Desplegable en móvil) -->
+        <div id="chatContainer" class="chat-container">
+            <button class="btn-toggle-chat" onclick="toggleChatMovil()">💬 Ocultar / Mostrar Chat</button>
             <iframe src="https://kick.com/popout/vchicolatino/chat"></iframe>
         </div>
 
     </div>
-	<script>
+
+    <script>
         const video = document.getElementById('videoPrivate');
-		const theaterDiv = document.getElementById('playerTheater');
+        const theaterDiv = document.getElementById('playerTheater');
         const progressFill = document.getElementById('progressFill');
         const timeDisplay = document.getElementById('timeDisplay');
         const volumeSlider = document.getElementById('volumeSlider');
-		const btnVolume = document.getElementById('btnVolume');
-		const btnLive = document.getElementById('btnLive');
-        // Enlace al archivo .m3u8 que subirás a GitHub Releases o Cloudflare
+        const btnVolume = document.getElementById('btnVolume');
+        const btnLive = document.getElementById('btnLive');
+        const chatContainer = document.getElementById('chatContainer');
+
         const videoSrc = 'https://cdn.jsdelivr.net/gh/vchicolatino/vchicolatino@main/public/video/db/Peliculas/Freezer%20contra%20el%20padre%20de%20Goku/stream.m3u8'; 
         const socket = io();
 
-		// Variables para controlar la sincronización del Live
         let targetLiveTime = 0;
         let lastSyncTimestamp = 0;
         let isStreamActive = false;
-		let ultimoVolumen = 1; // Guarda el nivel antes de mutear
-		
-		// Desbloquear audio/video con cualquier primer clic si el navegador lo requiere
+        let ultimoVolumen = 1;
+
         document.addEventListener('click', () => {
             if (video.paused && isStreamActive) {
                 video.muted = false;
@@ -375,8 +446,11 @@
             const transcurrido = (Date.now() - lastSyncTimestamp) / 1000;
             return targetLiveTime + transcurrido;
         }
-		
-		// Actualiza el indicador visual de tiempo restante y la barra de avance
+
+        function toggleChatMovil() {
+            chatContainer.classList.toggle('collapsed');
+        }
+
         video.addEventListener('timeupdate', () => {
             if (video.duration) {
                 const porcentaje = (video.currentTime / video.duration) * 100;
@@ -389,14 +463,12 @@
                 const minsFormat = mins < 10 ? `0${mins}` : mins;
                 const secsFormat = secs < 10 ? `0${secs}` : secs;
 
-                timeDisplay.innerText = `Restante: -${minsFormat}:${secsFormat}`;
-				
-				// VERIFICAR SI EL USUARIO ESTÁ EN EL TIEMPO EXACTO DEL EN VIVO
+                timeDisplay.innerText = `-${minsFormat}:${secsFormat}`;
+
                 if (isStreamActive) {
                     const tiempoRealTransmision = calcularTiempoActualTransmision();
                     const diferencia = Math.abs(tiempoRealTransmision - video.currentTime);
 
-                    // Si está a menos de 2.5 segundos del tiempo real, se considera "EN VIVO"
                     if (diferencia <= 2.5) {
                         btnLive.classList.add('is-live');
                     } else {
@@ -408,15 +480,14 @@
             }
         });
 
-		if (Hls.isSupported()) {
+        if (Hls.isSupported()) {
             const hls = new Hls();
             hls.loadSource(videoSrc);
             hls.attachMedia(video);
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = videoSrc;
         }
-		
-		// FUNCIÓN AL HACER CLIC EN EL BOTÓN "EN VIVO"
+
         function irAlEnVivo() {
             if (!isStreamActive) return;
             const tiempoReal = calcularTiempoActualTransmision();
@@ -424,8 +495,7 @@
             video.play().catch(e => console.log(e));
             btnLive.classList.add('is-live');
         }
-		
-		/* MANEJO DE VOLUMEN Y BOCINA CLICKEABLE */
+
         function actualizarIconoVolumen(vol) {
             if (vol == 0 || video.muted) {
                 btnVolume.innerText = '🔇';
@@ -435,29 +505,26 @@
                 btnVolume.innerText = '🔊';
             }
         }
-		
-        // Control unificado de Volumen
+
         function ajustarVolumen(valor) {
             video.volume = valor;
             if (valor > 0) {
-                video.muted = false; // Desmutea automáticamente cuando el espectador desliza el volumen
-				ultimoVolumen = valor;
-			} else {
+                video.muted = false;
+                ultimoVolumen = valor;
+            } else {
                 video.muted = true;
             }
-			actualizarIconoVolumen(video.muted ? 0 : valor);
+            actualizarIconoVolumen(video.muted ? 0 : valor);
         }
 
-		function toggleMute() {
+        function toggleMute() {
             if (video.muted || video.volume === 0) {
-                // Activar volumen al 100% (o al último volumen conocido)
                 const nuevoVol = ultimoVolumen > 0 ? ultimoVolumen : 1;
                 video.muted = false;
                 video.volume = nuevoVol;
                 volumeSlider.value = nuevoVol;
                 actualizarIconoVolumen(nuevoVol);
             } else {
-                // Mutear
                 ultimoVolumen = video.volume;
                 video.muted = true;
                 video.volume = 0;
@@ -465,8 +532,7 @@
                 actualizarIconoVolumen(0);
             }
         }
-		
-		// Control de reproducción con intento prioritario con Audio
+
         function intentarReproducirConAudio() {
             video.muted = false;
             video.volume = volumeSlider.value > 0 ? volumeSlider.value : 1;
@@ -474,16 +540,13 @@
             video.play().then(() => {
                 actualizarIconoVolumen(video.volume);
             }).catch(err => {
-                // Si el navegador bloquea el audio desmuteado al inicio, reproduce en Muted temporalmente
-                console.log("Autoplay con audio bloqueado por el navegador. Iniciando en Muted...");
                 video.muted = true;
                 actualizarIconoVolumen(0);
                 volumeSlider.value = 0;
                 video.play();
             });
         }
-		
-        // Maximizar el DIV completo
+
         function toggleFullscreen() {
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
                 if (theaterDiv.requestFullscreen) {
@@ -500,7 +563,6 @@
             }
         }
 
-        // Escuchar órdenes de sincronización en tiempo real
         socket.on('sync-state', (data) => {
             if(data.playing) {
                 video.currentTime = data.time;
@@ -508,33 +570,14 @@
             }
         });
 
-        /*socket.on('play-video', (data) => {
-            video.currentTime = data.time;
-            video.play();
-        });
-		
-		socket.on('pause-video', () => { video.pause(); });
-		
-		// NUEVO: Reanudar desde donde se pausó
-        socket.on('resume-video', () => {
-            video.play().catch(err => {
-                //statusDiv.innerText = "Haz clic en el video para reanudar";
-            });
-            //statusDiv.innerText = "Estado: Reproduciendo...";
-        });
-        */
-		
-		// Escuchadores de eventos WebSocket
         socket.on('play-video', (data) => {
             isStreamActive = true;
-            
             if (data.time !== undefined) {
                 targetLiveTime = data.time;
                 lastSyncTimestamp = Date.now();
                 video.currentTime = data.time;
             }
-            //video.play().catch(err => console.log("Autoplay Muted:", err));
-			intentarReproducirConAudio();
+            intentarReproducirConAudio();
         });
 
         socket.on('pause-video', () => { 
@@ -543,20 +586,17 @@
             btnLive.classList.remove('is-live');
         });
 
-		socket.on('resume-video', (data) => {
+        socket.on('resume-video', (data) => {
             isStreamActive = true;
             if (data && data.time !== undefined) {
                 targetLiveTime = data.time;
                 lastSyncTimestamp = Date.now();
                 video.currentTime = data.time;
             }
-            //video.play();
-			intentarReproducirConAudio();
+            intentarReproducirConAudio();
         });
-		
+
         socket.on('seek-video', (data) => { video.currentTime = data.time; });
-		
-		
     </script>
 </body>
 </html>
