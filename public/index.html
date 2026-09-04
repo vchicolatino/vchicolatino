@@ -359,12 +359,16 @@
             .kick-actions {
                 top: 220px;
                 right: 10px;
-				display: block;
+				flex-direction: column; /* Alineación vertical */
+				align-items: flex-end; /* Alinea los botones hacia la derecha */
+				gap: 6px;               /* Espacio entre cada botón */
             }
 
             .btn-kick {
                 padding: 6px 10px;
                 font-size: 11px;
+				width: 100%;            /* Asegura un ancho uniforme */
+				justify-content: center;
             }
 
             .volume-slider {
