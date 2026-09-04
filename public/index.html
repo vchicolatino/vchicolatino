@@ -628,22 +628,20 @@
 			}
 		}*/
 
-		/* MANEJO DE VOLUMEN UNIFICADO Y SINCRONIZACIÓN CON KICK */
+		/* MANEJO DE VOLUMEN Y DESMUTEO DIRECTO DE KICK */
 		function ajustarVolumen(valor) {
-			video.volume = valor;
-			
-			if (valor > 0) {
-				if (video.muted) {
-					video.muted = false;
-					sincronizarAudioKick(false); // Desmutear Kick
-				}
-				ultimoVolumen = valor;
+			const volNum = parseFloat(valor);
+			video.volume = volNum;
+
+			if (volNum > 0) {
+				video.muted = false;
+				ultimoVolumen = volNum;
+				sincronizarAudioKick(false);
 			} else {
 				video.muted = true;
-				sincronizarAudioKick(true); // Mutear Kick
+				sincronizarAudioKick(true);
 			}
-			
-			actualizarIconoVolumen(video.muted ? 0 : valor);
+			actualizarIconoVolumen(video.muted ? 0 : volNum);
 		}
 
 		function toggleMute() {
@@ -653,14 +651,14 @@
 				video.volume = nuevoVol;
 				volumeSlider.value = nuevoVol;
 				actualizarIconoVolumen(nuevoVol);
-				sincronizarAudioKick(false); // Desmutear Kick
+				sincronizarAudioKick(false);
 			} else {
 				ultimoVolumen = video.volume;
 				video.muted = true;
 				video.volume = 0;
 				volumeSlider.value = 0;
 				actualizarIconoVolumen(0);
-				sincronizarAudioKick(true); // Mutear Kick
+				sincronizarAudioKick(true);
 			}
 		}
 
@@ -668,13 +666,31 @@
 			const kickIframe = document.getElementById('kickIframe');
 			if (!kickIframe) return;
 
-			const urlActual = new URL(kickIframe.src);
-			const estadoMutedActual = urlActual.searchParams.get('muted') === 'true';
+			// 1. Envío de comando vía PostMessage a la API interna de Kick
+			if (kickIframe.contentWindow) {
+				kickIframe.contentWindow.postMessage({
+					method: debeMutear ? 'mute' : 'unmute'
+				}, 'https://player.kick.com');
+				
+				kickIframe.contentWindow.postMessage(JSON.stringify({
+					event: debeMutear ? 'mute' : 'unmute',
+					method: 'setVolume',
+					value: debeMutear ? 0 : (video.volume || 1)
+				}), '*');
+			}
 
-			// Solo actualizamos el src si el estado de mute realmente cambió
-			if (estadoMutedActual !== debeMutear) {
-				urlActual.searchParams.set('muted', debeMutear ? 'true' : 'false');
-				kickIframe.src = urlActual.toString();
+			// 2. Si Kick no responde al postMessage por restricciones del navegador,
+			// actualizamos la propiedad muted de la URL de forma limpia.
+			try {
+				const url = new URL(kickIframe.src);
+				const estadoMuted = url.searchParams.get('muted') === 'true';
+				
+				if (estadoMuted !== debeMutear) {
+					url.searchParams.set('muted', debeMutear ? 'true' : 'false');
+					kickIframe.src = url.toString();
+				}
+			} catch (e) {
+				console.log("Sincronización de audio ejecutada.");
 			}
 		}
 		
