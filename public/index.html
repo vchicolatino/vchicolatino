@@ -356,13 +356,21 @@
             /* Reducción del 10% en el contenedor de Kick (175x240 -> 157x216) */
             .kick-crop-box {
                 width: 100px !important;
-                height: 160px !important;
+                height: 120px !important;
                 top: 40px;
                 right: 10px;
             }
-
+			
+			.kick-crop-box iframe {
+				width: 350%; /* Aumentado para eliminar bordes laterales y cubrir alto */
+				height: 100%;
+				transform: scale(1.2); /* Amplía levemente la señal para eliminar franjas negras arriba/abajo */
+				transform-origin: center center;
+				border: none;
+				pointer-events: none; /* Mantiene el clic transparente hacia la interfaz */
+			}
             .kick-actions {
-                top: 210px;
+                top: 170px;
                 right: 10px;
 				flex-direction: column; /* Alineación vertical */
 				align-items: flex-end; /* Alinea los botones hacia la derecha */
