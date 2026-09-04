@@ -3,6 +3,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const path = require('path');
+const WebSocket = require('ws');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -16,56 +17,92 @@ let streamState = {
 };
 
 // ----------------------------------------------------
-// CONEXIÓN EN TIEMPO REAL AL CHAT DE KICK (vchicolatino)
+// CONEXIÓN DIRECTA POR WEBSOCKET AL CHAT DE KICK
 // ----------------------------------------------------
 const KICK_CHANNEL_SLUG = "vchicolatino";
 
-async function iniciarConexionKickChat() {
+async function conectarKickChatWS() {
     try {
-        // 1. Obtener el ID numérico del canal desde la API pública de Kick
-        const response = await fetch(`https://kick.com/api/v1/channels/${KICK_CHANNEL_SLUG}`);
+        console.log(`[KICK] Consultando datos de canal para: ${KICK_CHANNEL_SLUG}...`);
+        
+        // Obtener ID del chatroom con Headers de navegador para evitar bloqueos
+        const response = await fetch(`https://kick.com/api/v1/channels/${KICK_CHANNEL_SLUG}`, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'application/json'
+            }
+        });
+        
         const data = await response.json();
-        const chatroomData = data.chatroom || data.channel?.chatroom;
+        const chatroomId = data.chatroom?.id || data.channel?.chatroom?.id;
 
-        if (!chatroomData || !chatroomData.id) {
-            console.log("No se pudo obtener el Chatroom ID de Kick. Reintentando...");
-            setTimeout(iniciarConexionKickChat, 10000);
+        if (!chatroomId) {
+            console.log("[KICK WARNING] No se obtuvo el Chatroom ID. Reintentando en 10s...");
+            setTimeout(conectarKickChatWS, 10000);
             return;
         }
 
-        const chatroomId = chatroomData.id;
-        console.log(`[KICK] Conectado exitosamente al Chatroom ID: ${chatroomId}`);
+        console.log(`[KICK SUCCESS] Chatroom ID encontrado: ${chatroomId}. Conectando a WS...`);
 
-        // 2. Conectar al WebSocket público de Pusher que usa Kick
-        const pusher = new Pusher('32cbd69e4b950c99d79c', {
-            cluster: 'us2',
-            forceTLS: true
+        // Conexión al servidor WebSocket de Pusher que utiliza Kick actualmente
+        const wsUrl = 'wss://ws-us2.pusher.com/app/eb1d5f283082f78b2751?protocol=7&client=js&version=7.4.0&flash=false';
+        const ws = new WebSocket(wsUrl);
+
+        ws.on('open', () => {
+            console.log('[KICK WS] Conexión establecida con el servidor de Kick.');
+            
+            // Suscribirse al canal específico del chatroom
+            const subscribeMessage = JSON.stringify({
+                event: 'pusher:subscribe',
+                data: { auth: '', channel: `chatrooms.${chatroomId}.v2` }
+            });
+            ws.send(subscribeMessage);
         });
 
-        const channel = pusher.subscribe(`chatrooms.${chatroomId}.v2`);
+        ws.on('message', (rawMessage) => {
+            try {
+                const parsed = JSON.parse(rawMessage);
 
-        // 3. Escuchar cada mensaje enviado por los usuarios reales de Kick
-        channel.bind('App\\Events\\ChatMessageEvent', (data) => {
-            if (data && data.sender && data.content) {
-                const usuario = data.sender.username;
-                const mensaje = data.content;
+                // Escuchar el evento de nuevo mensaje
+                if (parsed.event === 'App\\Events\\ChatMessageEvent') {
+                    const eventData = typeof parsed.data === 'string' ? JSON.parse(parsed.data) : parsed.data;
+                    
+                    if (eventData && eventData.sender && eventData.content) {
+                        const usuario = eventData.sender.username;
+                        const mensaje = eventData.content;
 
-                // Transmitir a todos los clientes web en tiempo real
-                io.emit('new-chat-message', {
-                    user: usuario,
-                    message: mensaje
-                });
+                        console.log(`[KICK CHAT] ${usuario}: ${mensaje}`);
+
+                        // Retransmitir a todos los clientes web en tiempo real
+                        io.emit('new-chat-message', {
+                            user: usuario,
+                            message: mensaje
+                        });
+                    }
+                }
+            } catch (e) {
+                // Ignorar pings o mensajes de control del socket
             }
         });
 
+        ws.on('close', () => {
+            console.log('[KICK WS] Conexión cerrada. Reconectando en 5 segundos...');
+            setTimeout(conectarKickChatWS, 5000);
+        });
+
+        ws.on('error', (err) => {
+            console.error('[KICK WS ERROR]', err.message);
+            ws.close();
+        });
+
     } catch (error) {
-        console.error("[KICK ERROR] Error al conectar con el chat de Kick:", error.message);
-        setTimeout(iniciarConexionKickChat, 10000);
+        console.error("[KICK ERROR]", error.message);
+        setTimeout(conectarKickChatWS, 10000);
     }
 }
 
 // Iniciar escuchador de Kick
-iniciarConexionKickChat();
+conectarKickChatWS();
 
 // ----------------------------------------------------
 // MANEJO DE RUTAS Y SOCKETS WEBSOCKET
@@ -111,17 +148,20 @@ io.on('connection', (socket) => {
     });
 
     socket.on('admin-seek', (time) => {
-        currentVideoTime = time;
-        io.emit('seek-video', { time: currentVideoTime });
+        streamState.startOffset = time;
+        if (streamState.isPlaying) {
+            streamState.startTime = Date.now();
+        }
+        io.emit('seek-video', { time: time });
     });
 	
     socket.on('resume-video', () => {
         streamState.isPlaying = true;
         streamState.startTime = Date.now();
-        io.emit('resume-video',{ time: streamState.startOffset });
+        io.emit('resume-video', { time: streamState.startOffset });
     });
 
-    // NUEVO EVENTO: Actualizar labels en tiempo real
+    // Actualizar labels en tiempo real
     socket.on('admin-update-titles', (data) => {
         streamState.titleTop = data.titleTop || "";
         streamState.titleBottom = data.titleBottom || "";
