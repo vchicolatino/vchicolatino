@@ -343,6 +343,11 @@
 
             #videoPrivate {
                 width: calc(100% - 60px) !important;
+				/* Al bajar el segundo número (o subir la altura con proporciones), 
+				   el video se hace más alto que un 16:9 tradicional. */
+				aspect-ratio: 16 / 11.5 !important; 
+				height: auto !important;
+				object-fit: cover !important; /* Llena el espacio sin dejar barras negras */
                 margin-left: 10px;
                 margin-top: 10px;
                 margin-bottom: 10px;
