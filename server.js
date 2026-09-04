@@ -15,6 +15,65 @@ let streamState = {
     titleBottom: "" // Texto del Label inferior
 };
 
+// ----------------------------------------------------
+// CONEXIÓN EN TIEMPO REAL AL CHAT DE KICK (vchicolatino)
+// ----------------------------------------------------
+const KICK_CHANNEL_SLUG = "vchicolatino";
+
+async function iniciarConexionKickChat() {
+    try {
+        // 1. Obtener el ID numérico del canal desde la API pública de Kick
+        const response = await fetch(`https://kick.com/api/v1/channels/${KICK_CHANNEL_SLUG}`);
+        const data = await response.json();
+        const chatroomData = data.chatroom || data.channel?.chatroom;
+
+        if (!chatroomData || !chatroomData.id) {
+            console.log("No se pudo obtener el Chatroom ID de Kick. Reintentando...");
+            setTimeout(iniciarConexionKickChat, 10000);
+            return;
+        }
+
+        const chatroomId = chatroomData.id;
+        console.log(`[KICK] Conectado exitosamente al Chatroom ID: ${chatroomId}`);
+
+        // 2. Conectar al WebSocket público de Pusher que usa Kick
+        const pusher = new Pusher('32cbd69e4b950c99d79c', {
+            cluster: 'us2',
+            forceTLS: true
+        });
+
+        const channel = pusher.subscribe(`chatrooms.${chatroomId}.v2`);
+
+        // 3. Escuchar cada mensaje enviado por los usuarios reales de Kick
+        channel.bind('App\\Events\\ChatMessageEvent', (data) => {
+            if (data && data.sender && data.content) {
+                const usuario = data.sender.username;
+                const mensaje = data.content;
+
+                // Transmitir a todos los clientes web en tiempo real
+                io.emit('new-chat-message', {
+                    user: usuario,
+                    message: mensaje
+                });
+            }
+        });
+
+    } catch (error) {
+        console.error("[KICK ERROR] Error al conectar con el chat de Kick:", error.message);
+        setTimeout(iniciarConexionKickChat, 10000);
+    }
+}
+
+// Iniciar escuchador de Kick
+iniciarConexionKickChat();
+
+// ----------------------------------------------------
+// MANEJO DE RUTAS Y SOCKETS WEBSOCKET
+// ----------------------------------------------------
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 io.on('connection', (socket) => {
     // Enviar estado actual (video y títulos) al nuevo espectador que se conecta
     if (streamState.isPlaying) {
