@@ -23,15 +23,6 @@
             flex-direction: column;
         }
 
-        #status {
-            background: #181c1e;
-            padding: 6px 15px;
-            font-size: 12px;
-            color: #53fc18;
-            text-align: center;
-            border-bottom: 1px solid #282d30;
-        }
-
         .main-layout {
             display: flex;
             flex: 1;
@@ -40,7 +31,6 @@
             position: relative;
         }
 
-        /* CONTENEDOR UNIFICADO */
         .player-theater {
             flex: 1;
             position: relative;
@@ -52,8 +42,7 @@
             width: 100%;
             height: 100%;
         }
-		
-		/* CONTENEDOR ESPECÍFICO DE VIDEO Y LABELS */
+
         .video-wrapper {
             width: calc(100% - 150px);
             height: calc(100% - 45px);
@@ -70,10 +59,9 @@
             font-weight: bold;
             color: #ffffff;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            /* Configuración para permitir saltos de línea */
-			white-space: normal;       /* Permite que el texto baje a la siguiente línea */
-			word-break: break-word;     /* Rompe palabras muy largas si no caben */
-			overflow-wrap: break-word; /* Asegura el ajuste en navegadores modernos */
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: break-word;
             padding: 4px 6px;
         }
 
@@ -85,7 +73,6 @@
         .video-label-bottom {
             text-align: center;
             color: #cccccc;
-            //font-size: 22px;
         }
 
         #videoPrivate {
@@ -104,35 +91,32 @@
             display: none !important;
         }
 
-		/* Cámara Recortada de Kick (Sin franjas negras) */
-		.kick-crop-box {
-			position: absolute;
-			top: 20px;
-			right: 40px;
-			width: 175px;
-			height: 240px;
-			border-radius: 10px;
-			overflow: hidden;
-			border: 2px solid #53fc18;
-			box-shadow: 0 8px 24px rgba(0,0,0,0.8);
-			background: #000;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			z-index: 10;
-		}
+        .kick-crop-box {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            width: 175px;
+            height: 240px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #53fc18;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
 
-		/* Escalar iframe para forzar llenado vertical completo */
-		.kick-crop-box iframe {
-			width: 350%; /* Aumentado para eliminar bordes laterales y cubrir alto */
-			height: 100%;
-			transform: scale(1.4); /* Amplía levemente la señal para eliminar franjas negras arriba/abajo */
-			transform-origin: center center;
-			border: none;
-			pointer-events: none; /* Mantiene el clic transparente hacia la interfaz */
-		}
+        .kick-crop-box iframe {
+            width: 350%;
+            height: 100%;
+            transform: scale(1.4);
+            transform-origin: center center;
+            border: none;
+            pointer-events: none;
+        }
 
-        /* Botones Flotantes de Kick */
         .kick-actions {
             position: absolute;
             top: 270px;
@@ -162,7 +146,6 @@
         .btn-subscribe { background-color: #00e701; color: #000; animation-delay: 0.5s; }
         .btn-kick:hover { transform: scale(1.05); }
 
-        /* BARRA DE CONTROLES UNIFICADA */
         .custom-controls-bar {
             width: 100%;
             height: 45px;
@@ -175,7 +158,6 @@
             border-top: 1px solid #282d30;
         }
 
-        /* BOTÓN EN VIVO */
         .btn-live {
             display: flex;
             align-items: center;
@@ -253,6 +235,40 @@
             align-items: center;
             gap: 8px;
             font-size: 13px;
+            position: relative;
+        }
+
+        /* NOTIFICACIÓN FLOTANTE DE AUDIO */
+        .audio-toast {
+            position: absolute;
+            bottom: 40px;
+            right: 0;
+            background: rgba(18, 20, 21, 0.95);
+            border: 1px solid #53fc18;
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 100;
+            animation: floatNotice 2s infinite ease-in-out;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .audio-toast.hidden {
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+
+        @keyframes floatNotice {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
         }
 
         .btn-volume-icon {
@@ -289,7 +305,6 @@
         .player-theater:fullscreen { width: 100vw; height: 100vh; }
         .player-theater:-webkit-full-screen { width: 100vw; height: 100vh; }
 
-        /* Chat Lateral */
         .chat-container {
             width: 320px;
             height: 100%;
@@ -299,10 +314,7 @@
             flex-direction: column;
         }
 
-        .btn-toggle-chat {
-            display: none; /* Oculto en PC */
-        }
-
+        .btn-toggle-chat { display: none; }
         .chat-container iframe { width: 100%; height: 100%; border: none; }
 
         @keyframes pulseAttention {
@@ -312,29 +324,17 @@
             95% { transform: scale(1.05) rotate(0deg); }
         }
 
-        /* =========================================================
-           VISTA ADAPTADA PARA DISPOSITIVOS MÓVILES (Móvil/Tablet)
-           ========================================================= */
         @media (max-width: 768px) {
-            body {
-                overflow-y: auto; /* Permitir scroll si es necesario */
-            }
+            body { overflow-y: auto; }
+            .main-layout { flex-direction: column; height: auto; }
 
-            .main-layout {
-                flex-direction: column;
-                height: auto;
+            .video-wrapper { 
+                width: calc(100% - 60px) !important;
+                margin-left: 10px;
             }
-
-			.video-wrapper { 
-				width: calc(100% - 60px) !important;
-				margin-left: 10px;
-			}
-			
-			.video-label {
-				font-size: 14px;
-			}
-			
-            /* Reducción del 10% en el alto del contenedor principal */
+            
+            .video-label { font-size: 14px; }
+            
             .player-theater {
                 height: calc(90vh - 30px) !important;
                 min-height: 380px;
@@ -343,52 +343,55 @@
 
             #videoPrivate {
                 width: calc(100% - 60px) !important;
-				/* Al bajar el segundo número (o subir la altura con proporciones), 
-				   el video se hace más alto que un 16:9 tradicional. */
-				aspect-ratio: 16 / 11.5 !important; 
-				height: auto !important;
-				object-fit: cover !important; /* Llena el espacio sin dejar barras negras */
+                aspect-ratio: 16 / 11.5 !important; 
+                height: auto !important;
+                object-fit: cover !important;
                 margin-left: 10px;
                 margin-top: 10px;
                 margin-bottom: 10px;
             }
 
-            /* Reducción del 10% en el contenedor de Kick (175x240 -> 157x216) */
             .kick-crop-box {
                 width: 100px !important;
                 height: 120px !important;
                 top: 40px;
                 right: 10px;
             }
-			
-			.kick-crop-box iframe {
-				width: 350%; /* Aumentado para eliminar bordes laterales y cubrir alto */
-				height: 100%;
-				transform: scale(1.2); /* Amplía levemente la señal para eliminar franjas negras arriba/abajo */
-				transform-origin: center center;
-				border: none;
-				pointer-events: none; /* Mantiene el clic transparente hacia la interfaz */
-			}
+            
+            .kick-crop-box iframe {
+                width: 350%;
+                height: 100%;
+                transform: scale(1.2);
+                transform-origin: center center;
+                border: none;
+                pointer-events: none;
+            }
+
             .kick-actions {
                 top: 170px;
                 right: 10px;
-				flex-direction: column; /* Alineación vertical */
-				align-items: flex-end; /* Alinea los botones hacia la derecha */
-				gap: 6px;               /* Espacio entre cada botón */
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 6px;
             }
 
             .btn-kick {
                 padding: 6px 10px;
                 font-size: 11px;
-				width: 100%;            /* Asegura un ancho uniforme */
-				justify-content: center;
+                width: 100%;
+                justify-content: center;
             }
 
-            .volume-slider {
-                width: 50px; /* Ajuste del slider para pantallas angostas */
+            /* MANTENER ICONO Y BARRA DE VOLUMEN IDÉNTICA A ESCRITORIO */
+            .btn-volume-icon { font-size: 16px !important; }
+            .volume-slider { width: 50px; }
+
+            .audio-toast {
+                right: -10px;
+                font-size: 11px;
+                padding: 6px 10px;
             }
 
-            /* Chat Desplegable */
             .chat-container {
                 width: 100%;
                 height: 400px;
@@ -411,54 +414,43 @@
                 text-align: center;
             }
 
-            .chat-container.collapsed iframe {
-                display: none;
-            }
-
-            .chat-container.collapsed {
-                height: auto;
-            }
+            .chat-container.collapsed iframe { display: none; }
+            .chat-container.collapsed { height: auto; }
         }
     </style>
 </head>
 <body>
     <div class="main-layout">
-        
-        <!-- DIV UNIFICADO DE REPRODUCCIÓN -->
         <div id="playerTheater" class="player-theater">
             
-            <!-- Botones de Acción Kick -->
             <div class="kick-actions">
                 <a href="https://kick.com/vchicolatino" target="_blank" class="btn-kick btn-follow">💚 Seguir</a>
                 <a href="https://kick.com/vchicolatino/subscribe" target="_blank" class="btn-kick btn-subscribe">⭐ Suscribirse</a>
             </div>
 
-            <!-- CONTENEDOR CON LABELS Y VIDEO -->
             <div class="video-wrapper">
                 <div id="labelTop" class="video-label video-label-top"></div>
+                <!-- VIDEO INICIA MUTEADO PARA AUTOPLAY INMEDIATO -->
                 <video id="videoPrivate" playsinline muted></video>
                 <div id="labelBottom" class="video-label video-label-bottom"></div>
             </div>
-			
-			<!-- Cámara Recortada de Kick con permisos de audio habilitados -->
-			<div class="kick-crop-box">
-				<iframe 
-					id="kickIframe"
-					src="https://player.kick.com/vchicolatino?autoplay=true&muted=false" 
-					allow="autoplay; encrypted-media; picture-in-picture"
-					allowfullscreen="true">
-				</iframe>
-			</div>
+            
+            <!-- KICK INICIA MUTEADO PARA AUTOPLAY INMEDIATO -->
+            <div class="kick-crop-box">
+                <iframe 
+                    id="kickIframe"
+                    src="https://player.kick.com/vchicolatino?autoplay=true&muted=true" 
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowfullscreen="true">
+                </iframe>
+            </div>
 
-            <!-- BARRA DE CONTROLES UNIFICADA -->
             <div class="custom-controls-bar">
                 
-                <!-- BOTÓN EN VIVO -->
                 <button id="btnLive" class="btn-live" onclick="irAlEnVivo()" title="Hacer clic para volver al en vivo">
                     <span class="live-dot"></span> EN VIVO
                 </button>
                 
-                <!-- Progreso del Video y Tiempo Restante -->
                 <div class="progress-container">
                     <div class="progress-bar-bg">
                         <div id="progressFill" class="progress-bar-fill"></div>
@@ -466,13 +458,17 @@
                     <div id="timeDisplay" class="time-display">-00:00</div>
                 </div>
 
-                <!-- Control Unificado de Volumen -->
                 <div class="volume-container">
-                    <button id="btnVolume" class="btn-volume-icon" onclick="toggleMute()" title="Silenciar / Activar sonido">🔊</button>
-                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1" oninput="ajustarVolumen(this.value)">
+                    <!-- NOTIFICACIÓN FLOTANTE -->
+                    <div id="audioToast" class="audio-toast">
+                        🔊 Recuerda activar el sonido del reproductor
+                    </div>
+
+                    <!-- BOTÓN CON EL ÍCONO DE MUTE POR DEFECTO -->
+                    <button id="btnVolume" class="btn-volume-icon" onclick="toggleMute()" title="Silenciar / Activar sonido">🔇</button>
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="0" oninput="ajustarVolumen(this.value)">
                 </div>
 
-                <!-- Botón de Maximizar Todo el Div -->
                 <button class="btn-fs-native" onclick="toggleFullscreen()" title="Pantalla Completa">
                     ⛶
                 </button>
@@ -481,7 +477,6 @@
 
         </div>
 
-        <!-- Chat de Kick (Desplegable en móvil) -->
         <div id="chatContainer" class="chat-container">
             <button class="btn-toggle-chat" onclick="toggleChatMovil()">💬 Ocultar / Mostrar Chat</button>
             <iframe src="https://kick.com/popout/vchicolatino/chat"></iframe>
@@ -498,24 +493,23 @@
         const btnVolume = document.getElementById('btnVolume');
         const btnLive = document.getElementById('btnLive');
         const chatContainer = document.getElementById('chatContainer');
-		const labelTop = document.getElementById('labelTop');
+        const labelTop = document.getElementById('labelTop');
         const labelBottom = document.getElementById('labelBottom');
-		
+        const audioToast = document.getElementById('audioToast');
+
         const videoSrc = 'https://cdn.jsdelivr.net/gh/vchicolatino/vchicolatino@main/public/video/db/Peliculas/Freezer%20contra%20el%20padre%20de%20Goku/stream.m3u8'; 
         const socket = io();
 
         let targetLiveTime = 0;
         let lastSyncTimestamp = 0;
         let isStreamActive = false;
-        let ultimoVolumen = 1;
+        let ultimoVolumen = 0.8; // Volumen por defecto al activar el audio
 
-        document.addEventListener('click', () => {
-            if (video.paused && isStreamActive) {
-                video.muted = false;
-                video.volume = volumeSlider.value > 0 ? volumeSlider.value : 1;
-                video.play().catch(e => console.log(e));
+        function ocultarNotificacionAudio() {
+            if (audioToast) {
+                audioToast.classList.add('hidden');
             }
-        }, { once: true });
+        }
 
         function calcularTiempoActualTransmision() {
             if (!isStreamActive || lastSyncTimestamp === 0) return 0;
@@ -582,130 +576,63 @@
             }
         }
 
-        function desmutearKick() {
-			const kickIframe = document.getElementById('kickIframe');
-			// Forzamos la recarga del iframe permitiendo audio tras la interacción del usuario
-			if (kickIframe) {
-				kickIframe.src = "https://player.kick.com/vchicolatino?autoplay=true&muted=false";
-			}
-		}
+        /* ENVÍO DE EVENTO DE AUDI0 VÍA POSTMESSAGE SIN RECARGAR IFRAME DE KICK */
+        function sincronizarAudioKick(debeMutear) {
+            const kickIframe = document.getElementById('kickIframe');
+            if (!kickIframe || !kickIframe.contentWindow) return;
 
-		function mutearKick() {
-			const kickIframe = document.getElementById('kickIframe');
-			if (kickIframe) {
-				kickIframe.src = "https://player.kick.com/vchicolatino?autoplay=true&muted=true";
-			}
-		}
+            const evento = debeMutear ? 'mute' : 'unmute';
+            const vol = debeMutear ? 0 : (video.volume || 1);
 
-		/*function ajustarVolumen(valor) {
-			video.volume = valor;
-			if (valor > 0) {
-				if (video.muted) desmutearKick();
-				video.muted = false;
-				ultimoVolumen = valor;
-			} else {
-				video.muted = true;
-				mutearKick();
-			}
-			actualizarIconoVolumen(video.muted ? 0 : valor);
-		}
+            kickIframe.contentWindow.postMessage(JSON.stringify({
+                event: evento,
+                method: 'setVolume',
+                value: vol
+            }), '*');
+        }
 
-		function toggleMute() {
-			if (video.muted || video.volume === 0) {
-				const nuevoVol = ultimoVolumen > 0 ? ultimoVolumen : 1;
-				video.muted = false;
-				video.volume = nuevoVol;
-				volumeSlider.value = nuevoVol;
-				actualizarIconoVolumen(nuevoVol);
-				desmutearKick(); // Activa audio en Kick
-			} else {
-				ultimoVolumen = video.volume;
-				video.muted = true;
-				video.volume = 0;
-				volumeSlider.value = 0;
-				actualizarIconoVolumen(0);
-				mutearKick(); // Silencia Kick
-			}
-		}*/
+        function ajustarVolumen(valor) {
+            const volNum = parseFloat(valor);
+            video.volume = volNum;
 
-		/* MANEJO DE VOLUMEN Y DESMUTEO DIRECTO DE KICK */
-		function ajustarVolumen(valor) {
-			const volNum = parseFloat(valor);
-			video.volume = volNum;
-
-			if (volNum > 0) {
-				video.muted = false;
-				ultimoVolumen = volNum;
-				sincronizarAudioKick(false);
-			} else {
-				video.muted = true;
-				sincronizarAudioKick(true);
-			}
-			actualizarIconoVolumen(video.muted ? 0 : volNum);
-		}
-
-		function toggleMute() {
-			if (video.muted || video.volume === 0) {
-				const nuevoVol = ultimoVolumen > 0 ? ultimoVolumen : 1;
-				video.muted = false;
-				video.volume = nuevoVol;
-				volumeSlider.value = nuevoVol;
-				actualizarIconoVolumen(nuevoVol);
-				sincronizarAudioKick(false);
-			} else {
-				ultimoVolumen = video.volume;
-				video.muted = true;
-				video.volume = 0;
-				volumeSlider.value = 0;
-				actualizarIconoVolumen(0);
-				sincronizarAudioKick(true);
-			}
-		}
-
-		function sincronizarAudioKick(debeMutear) {
-			const kickIframe = document.getElementById('kickIframe');
-			if (!kickIframe) return;
-
-			// 1. Envío de comando vía PostMessage a la API interna de Kick
-			if (kickIframe.contentWindow) {
-				kickIframe.contentWindow.postMessage({
-					method: debeMutear ? 'mute' : 'unmute'
-				}, 'https://player.kick.com');
-				
-				kickIframe.contentWindow.postMessage(JSON.stringify({
-					event: debeMutear ? 'mute' : 'unmute',
-					method: 'setVolume',
-					value: debeMutear ? 0 : (video.volume || 1)
-				}), '*');
-			}
-
-			// 2. Si Kick no responde al postMessage por restricciones del navegador,
-			// actualizamos la propiedad muted de la URL de forma limpia.
-			try {
-				const url = new URL(kickIframe.src);
-				const estadoMuted = url.searchParams.get('muted') === 'true';
-				
-				if (estadoMuted !== debeMutear) {
-					url.searchParams.set('muted', debeMutear ? 'true' : 'false');
-					kickIframe.src = url.toString();
-				}
-			} catch (e) {
-				console.log("Sincronización de audio ejecutada.");
-			}
-		}
-		
-        function intentarReproducirConAudio() {
-            video.muted = false;
-            video.volume = volumeSlider.value > 0 ? volumeSlider.value : 1;
-            
-            video.play().then(() => {
-                actualizarIconoVolumen(video.volume);
-            }).catch(err => {
+            if (volNum > 0) {
+                video.muted = false;
+                ultimoVolumen = volNum;
+                sincronizarAudioKick(false);
+                ocultarNotificacionAudio();
+            } else {
                 video.muted = true;
-                actualizarIconoVolumen(0);
+                sincronizarAudioKick(true);
+            }
+            actualizarIconoVolumen(video.muted ? 0 : volNum);
+        }
+
+        function toggleMute() {
+            ocultarNotificacionAudio();
+
+            if (video.muted || video.volume === 0) {
+                const nuevoVol = ultimoVolumen > 0 ? ultimoVolumen : 0.8;
+                video.muted = false;
+                video.volume = nuevoVol;
+                volumeSlider.value = nuevoVol;
+                actualizarIconoVolumen(nuevoVol);
+                sincronizarAudioKick(false);
+            } else {
+                ultimoVolumen = video.volume;
+                video.muted = true;
+                video.volume = 0;
                 volumeSlider.value = 0;
-                video.play();
-            });
+                actualizarIconoVolumen(0);
+                sincronizarAudioKick(true);
+            }
+        }
+
+        function intentarReproducirMuteado() {
+            video.muted = true;
+            video.volume = 0;
+            volumeSlider.value = 0;
+            actualizarIconoVolumen(0);
+            video.play().catch(err => console.log("Autoplay bloqueado:", err));
         }
 
         function toggleFullscreen() {
@@ -724,17 +651,10 @@
             }
         }
 
-		// ESCUCHADORES WEBSOCKET
+        // ESCUCHADORES WEBSOCKET
         socket.on('update-titles', (data) => {
             labelTop.innerText = data.titleTop;
             labelBottom.innerText = data.titleBottom;
-        });
-		
-        socket.on('sync-state', (data) => {
-            if(data.playing) {
-                video.currentTime = data.time;
-                video.play();
-            }
         });
 
         socket.on('play-video', (data) => {
@@ -744,7 +664,7 @@
                 lastSyncTimestamp = Date.now();
                 video.currentTime = data.time;
             }
-            intentarReproducirConAudio();
+            intentarReproducirMuteado();
         });
 
         socket.on('pause-video', () => { 
@@ -760,7 +680,7 @@
                 lastSyncTimestamp = Date.now();
                 video.currentTime = data.time;
             }
-            intentarReproducirConAudio();
+            intentarReproducirMuteado();
         });
 
         socket.on('seek-video', (data) => { video.currentTime = data.time; });
