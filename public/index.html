@@ -628,21 +628,24 @@
 			}
 		}*/
 
-		/* MANEJO DE VOLUMEN UNIFICADO SIN RECARGAR EL IFRAME DE KICK */
+		/* MANEJO DE VOLUMEN UNIFICADO Y SINCRONIZACIÓN CON KICK */
 		function ajustarVolumen(valor) {
 			video.volume = valor;
+			
 			if (valor > 0) {
-				video.muted = false;
+				if (video.muted) {
+					video.muted = false;
+					sincronizarAudioKick(false); // Desmutear Kick
+				}
 				ultimoVolumen = valor;
 			} else {
 				video.muted = true;
+				sincronizarAudioKick(true); // Mutear Kick
 			}
-			actualizarIconoVolumen(video.muted ? 0 : valor);
 			
-			// Enviamos el mensaje de volumen al iframe sin recargar la página
-			sincronizarAudioKick(video.muted ? 0 : valor);
+			actualizarIconoVolumen(video.muted ? 0 : valor);
 		}
-		
+
 		function toggleMute() {
 			if (video.muted || video.volume === 0) {
 				const nuevoVol = ultimoVolumen > 0 ? ultimoVolumen : 1;
@@ -650,27 +653,28 @@
 				video.volume = nuevoVol;
 				volumeSlider.value = nuevoVol;
 				actualizarIconoVolumen(nuevoVol);
-				sincronizarAudioKick(nuevoVol);
+				sincronizarAudioKick(false); // Desmutear Kick
 			} else {
 				ultimoVolumen = video.volume;
 				video.muted = true;
 				video.volume = 0;
 				volumeSlider.value = 0;
 				actualizarIconoVolumen(0);
-				sincronizarAudioKick(0);
+				sincronizarAudioKick(true); // Mutear Kick
 			}
 		}
 
-		function sincronizarAudioKick(nivelVolumen) {
+		function sincronizarAudioKick(debeMutear) {
 			const kickIframe = document.getElementById('kickIframe');
-			if (kickIframe && kickIframe.contentWindow) {
-				// Enviar señal de mutear/desmutear mediante postMessage al reproductor incrustado
-				const mensaje = nivelVolumen === 0 ? 'mute' : 'unmute';
-				kickIframe.contentWindow.postMessage(JSON.stringify({
-					event: mensaje,
-					method: 'setVolume',
-					value: nivelVolumen
-				}), '*');
+			if (!kickIframe) return;
+
+			const urlActual = new URL(kickIframe.src);
+			const estadoMutedActual = urlActual.searchParams.get('muted') === 'true';
+
+			// Solo actualizamos el src si el estado de mute realmente cambió
+			if (estadoMutedActual !== debeMutear) {
+				urlActual.searchParams.set('muted', debeMutear ? 'true' : 'false');
+				kickIframe.src = urlActual.toString();
 			}
 		}
 		
